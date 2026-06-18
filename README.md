@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/denisetiya/apinox/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/denisetiya/apinox/release.yml?branch=master&label=CI&logo=github" alt="CI"></a>
+  <a href="https://github.com/denisetiya/apinox/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/denisetiya/apinox/ci.yml?branch=master&label=CI&logo=github" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/denisetiya/apinox?color=blue" alt="License"></a>
   <a href="https://github.com/denisetiya/apinox/releases"><img src="https://img.shields.io/github/v/release/denisetiya/apinox?logo=rust" alt="Release"></a>
   <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/rust-1.70%2B-f74c00?logo=rust" alt="Rust"></a>
