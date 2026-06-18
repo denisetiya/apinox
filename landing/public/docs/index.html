@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documentation — Apinox</title>
+  <meta name="description" content="Complete Apinox documentation: schema format, CLI commands, output formats, installation guide, and best practices." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg-0:#050810;--bg-1:#0a0f1c;--bg-2:#111827;--bg-3:#1e293b;
+      --border:#1e2a3a;--border-light:#2a3a4e;
+      --text-0:#f8fafc;--text-1:#94a3b8;--text-2:#64748b;
+      --blue:#3b82f6;--blue-dim:#2563eb;--blue-glow:#3b82f630;--blue-bg:#3b82f610;
+      --green:#22c55e;--orange:#f59e0b;--red:#ef4444;--purple:#a855f7;--cyan:#06b6d4;
+      --radius:12px;--radius-lg:16px;--transition:0.25s cubic-bezier(0.4,0,0.2,1);
+      --sidebar-w:260px;
+    }
+    html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+    body{
+      font-family:'Inter',system-ui,-apple-system,sans-serif;
+      background:var(--bg-0);color:var(--text-0);line-height:1.7;overflow-x:hidden
+    }
+    code,.mono{font-family:'JetBrains Mono',monospace;font-size:13px}
+
+    /* ── Layout ── */
+    .layout{display:flex;min-height:100vh}
+    .sidebar{
+      position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);
+      background:var(--bg-1);border-right:1px solid var(--border);
+      overflow-y:auto;z-index:50;padding:0;flex-shrink:0;
+    }
+    .sidebar-inner{padding:24px 16px}
+    .sidebar .brand{
+      display:flex;align-items:center;gap:10px;
+      font-weight:800;font-size:18px;letter-spacing:-0.5px;
+      color:var(--text-0);text-decoration:none;margin-bottom:28px;
+    }
+    .sidebar .brand svg{width:24px;height:24px;flex-shrink:0}
+    .sidebar nav{display:flex;flex-direction:column;gap:2px}
+    .sidebar .nav-group{
+      font-size:10px;font-weight:700;letter-spacing:1.5px;
+      text-transform:uppercase;color:var(--text-2);
+      padding:16px 12px 6px;margin-top:4px;
+    }
+    .sidebar nav a{
+      color:var(--text-2);text-decoration:none;font-size:13px;font-weight:500;
+      padding:7px 12px;border-radius:8px;transition:all var(--transition);
+      border-left:2px solid transparent;
+    }
+    .sidebar nav a:hover{color:var(--text-0);background:var(--bg-2)}
+    .sidebar nav a.active{color:var(--blue);background:var(--blue-bg);border-left-color:var(--blue)}
+
+    .content{flex:1;margin-left:var(--sidebar-w);max-width:900px;padding:48px 48px 80px}
+    @media(max-width:900px){
+      .sidebar{display:none}
+      .content{margin-left:0;padding:24px 20px 60px}
+    }
+
+    /* ── Mobile menu toggle ── */
+    .mobile-nav{display:none;position:sticky;top:0;z-index:40;background:var(--bg-0);padding:12px 20px;border-bottom:1px solid var(--border)}
+    .mobile-nav-btn{background:var(--bg-2);border:1px solid var(--border);color:var(--text-0);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;width:100%}
+    .mobile-nav-btn:hover{background:var(--bg-3)}
+    .mobile-menu{display:none;background:var(--bg-1);border-bottom:1px solid var(--border);padding:8px 20px}
+    .mobile-menu.open{display:block}
+    .mobile-menu a{display:block;padding:10px 12px;color:var(--text-2);text-decoration:none;font-size:14px;border-radius:8px}
+    .mobile-menu a:hover{color:var(--text-0);background:var(--bg-2)}
+    @media(max-width:900px){.mobile-nav{display:block}}
+
+    /* ── Content styles ── */
+    .content h1{font-size:36px;font-weight:900;letter-spacing:-1.5px;margin-bottom:8px;line-height:1.1}
+    .content h1 .gradient{background:linear-gradient(135deg,#3b82f6,#06b6d4,#a855f7);-webkit-background-clip:text;-webkit-text-fill:transparent;background-clip:text}
+    .content .lead{font-size:16px;color:var(--text-1);margin-bottom:40px;line-height:1.7}
+    .content h2{
+      font-size:24px;font-weight:800;letter-spacing:-0.5px;
+      margin-top:48px;margin-bottom:12px;padding-bottom:8px;
+      border-bottom:1px solid var(--border);line-height:1.2;
+    }
+    .content h2 .anchor{color:var(--blue);opacity:0;transition:opacity var(--transition);text-decoration:none}
+    .content h2:hover .anchor{opacity:1}
+    .content h3{font-size:18px;font-weight:700;margin-top:28px;margin-bottom:8px}
+    .content h4{font-size:15px;font-weight:600;margin-top:20px;margin-bottom:6px;color:var(--text-1)}
+    .content p,.content li{font-size:14.5px;color:var(--text-1);line-height:1.75}
+    .content p{margin-bottom:12px}
+    .content ul,.content ol{padding-left:20px;margin-bottom:16px}
+    .content li{margin-bottom:4px}
+    .content strong{color:var(--text-0);font-weight:600}
+    .content a{color:var(--blue);text-decoration:none;transition:color var(--transition)}
+    .content a:hover{color:var(--cyan);text-decoration:underline}
+
+    /* ── Code blocks ── */
+    .content code:not(pre code){
+      background:var(--bg-2);padding:2px 7px;border-radius:5px;
+      font-size:12.5px;color:var(--cyan);border:1px solid var(--border);
+    }
+    .content pre{
+      background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);
+      padding:18px 20px;overflow-x:auto;margin:12px 0 20px;position:relative;
+    }
+    .content pre code{
+      background:none;border:none;padding:0;color:var(--text-1);
+      font-size:13px;line-height:1.7;tab-size:2;
+    }
+    .content pre .kw{color:#c084fc}.content pre .str{color:#34d399}
+    .content pre .num{color:#f59e0b}.content pre .cmt{color:#475569;font-style:italic}
+    .content pre .key{color:#e2e8f0}.content pre .type{color:#f472b6}
+    .content pre .fn{color:#60a5fa}.content pre .op{color:#64748b}
+    .content pre .ln{color:#475569;user-select:none;margin-right:16px}
+    .content pre .pr{color:#64748b}.content pre .pu{color:#f87171}
+
+    /* ── Code block copy btn ── */
+    .code-wrap{position:relative}
+    .copy-btn{
+      position:absolute;top:8px;right:8px;
+      background:var(--bg-2);border:1px solid var(--border);color:var(--text-2);
+      padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;
+      font-family:'Inter',sans-serif;transition:all var(--transition);z-index:2;
+    }
+    .copy-btn:hover{background:var(--bg-3);color:var(--text-0);border-color:var(--border-light)}
+    .copy-btn.copied{background:var(--green);color:#000;border-color:var(--green)}
+
+    /* ── Info boxes ── */
+    .info-box{
+      border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin:16px 0 20px;
+      border-left:3px solid var(--blue);background:var(--bg-1);
+    }
+    .info-box.tip{border-left-color:var(--green)}
+    .info-box.warn{border-left-color:var(--orange)}
+    .info-box.caution{border-left-color:var(--red)}
+    .info-box .label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+    .info-box.tip .label{color:var(--green)}
+    .info-box.warn .label{color:var(--orange)}
+    .info-box.caution .label{color:var(--red)}
+    .info-box .label{color:var(--blue)}
+    .info-box p:last-child{margin-bottom:0}
+
+    /* ── Tables ── */
+    .content table{
+      width:100%;border-collapse:collapse;margin:12px 0 20px;
+      font-size:13.5px;
+    }
+    .content th,.content td{
+      border:1px solid var(--border);padding:10px 14px;text-align:left;
+    }
+    .content th{
+      background:var(--bg-1);font-weight:600;color:var(--text-0);font-size:12px;text-transform:uppercase;letter-spacing:0.5px;
+    }
+    .content td{color:var(--text-1);vertical-align:top}
+
+    /* ── CLI cards ── */
+    .cmd-card{
+      background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);
+      padding:14px 18px;margin:8px 0 12px;
+      display:flex;align-items:center;gap:12px;transition:all var(--transition);cursor:pointer;
+    }
+    .cmd-card:hover{border-color:var(--blue);background:var(--bg-2)}
+    .cmd-card .prompt{color:var(--green);font-weight:600;font-family:'JetBrains Mono',monospace;font-size:13px;flex-shrink:0}
+    .cmd-card .cmd{color:var(--text-0);font-family:'JetBrains Mono',monospace;font-size:13px;flex:1;word-break:break-all}
+    .cmd-card .descr{font-size:12px;color:var(--text-2);flex-shrink:0}
+
+    /* ── Card grid ── */
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:12px 0 20px}
+    .card-grid .card{background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center;transition:all var(--transition)}
+    .card-grid .card:hover{border-color:var(--blue);transform:translateY(-2px)}
+    .card-grid .card .ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+    .card-grid .card h4{font-size:13px;font-weight:700;color:var(--text-0);margin:0 0 2px}
+    .card-grid .card p{font-size:11px;color:var(--text-2);margin:0;width:100%}
+
+    /* ── Footer ── */
+    .docs-footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .docs-footer p{font-size:12px;color:var(--text-2);margin:0}
+    .docs-footer a{font-size:12px;color:var(--text-1);text-decoration:none}
+
+    /* ── Term output ── */
+    .term-line{display:flex;gap:12px;font-size:13px;line-height:1.6}
+    .term-line .p{color:var(--green)}.term-line .c{color:var(--text-0)}
+    .term-line .o{color:var(--text-2)}.term-line .ok{color:var(--green)}
+    .term-line .a{color:var(--blue)}.term-line .n{color:var(--orange)}
+
+    /* ── Tabs ── */
+    .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:0}
+    .tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--text-2);padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all var(--transition)}
+    .tab-btn:hover{color:var(--text-0)}
+    .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+    .tab-content{display:none}.tab-content.active{display:block}
+
+    @media(max-width:600px){
+      .content pre{font-size:11.5px;padding:14px}
+      .cmd-card{flex-wrap:wrap}
+      .card-grid{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ MOBILE NAV ═══ -->
+<div class="mobile-nav">
+  <button class="mobile-nav-btn" onclick="document.getElementById('mobileMenu').classList.toggle('open')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    Documentation Menu
+  </button>
+</div>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#getting-started" onclick="closeM()">Getting Started</a>
+  <a href="#schema" onclick="closeM()">Schema Reference</a>
+  <a href="#cli" onclick="closeM()">CLI Reference</a>
+  <a href="#outputs" onclick="closeM()">Output Formats</a>
+  <a href="#guides" onclick="closeM()">Guides</a>
+  <a href="#faq" onclick="closeM()">FAQ</a>
+  <a href="/" style="color:var(--blue)">← Back to Home</a>
+</div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sidebar-inner">
+    <a href="/" class="brand">
+      <svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="5" fill="#3b82f6"/><path d="M6 8.5h14M6 13h9M6 17.5h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="17.5" r="2.5" fill="#22c55e"/></svg>
+      Apinox
+    </a>
+    <nav>
+      <div class="nav-group">Getting Started</div>
+      <a href="#getting-started">Installation</a>
+      <a href="#quick-start">Quick Start</a>
+      <a href="#how-it-works">How It Works</a>
+
+      <div class="nav-group">Schema Reference</div>
+      <a href="#schema">Overview</a>
+      <a href="#schema-root">Root Fields</a>
+      <a href="#schema-auth">Authentication</a>
+      <a href="#schema-env">Environments</a>
+      <a href="#schema-groups">Groups</a>
+      <a href="#schema-endpoints">Endpoints</a>
+      <a href="#schema-body">Request Body</a>
+      <a href="#schema-responses">Responses</a>
+      <a href="#schema-errors">Error Patterns</a>
+      <a href="#schema-includes">Modular Includes</a>
+      <a href="#schema-changelog">Changelog</a>
+
+      <div class="nav-group">CLI Reference</div>
+      <a href="#cli-validate">Validate</a>
+      <a href="#cli-build">Build</a>
+      <a href="#cli-watch">Watch</a>
+      <a href="#cli-diff">Diff</a>
+      <a href="#cli-migrate">Migrate</a>
+      <a href="#cli-import">Import</a>
+      <a href="#cli-sync">Postman Sync</a>
+
+      <div class="nav-group">Outputs</div>
+      <a href="#outputs">Format Overview</a>
+
+      <div class="nav-group">Guides</div>
+      <a href="#guides-modular">Modular Schemas</a>
+      <a href="#guides-ci">CI/CD Integration</a>
+
+      <div class="nav-group" style="border-top:1px solid var(--border);margin-top:16px;padding-top:16px">
+        <a href="/" style="color:var(--blue)">← Back to Home</a>
+      </div>
+    </nav>
+  </div>
+</aside>
+
+<!-- ═══ CONTENT ═══ -->
+<main class="content">
+
+  <h1><span class="gradient">Apinox</span> Documentation</h1>
+  <p class="lead">Define your API once. Generate Postman, OpenAPI, Markdown, Scalar, Insomnia, Hurl, and curl — from a single YAML or JSON schema.</p>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- GETTING STARTED -->
+  <!-- ════════════════════════════════════════════ -->
+  <section id="getting-started">
+    <h2>Getting Started</h2>
+
+    <h3 id="installation">Installation</h3>
+    <p>A single static binary. No runtime, no dependencies.</p>
+
+    <h4>Linux / macOS</h4>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyT(this,'curl -sSL https://apinox.denisetiya.site/install.sh | bash')">Copy</button>
+      <pre><code><span class="pr">$</span> curl -sSL https://apinox.denisetiya.site/install.sh | bash</code></pre>
+    </div>
+
+    <h4>Windows (PowerShell)</h4>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyT(this,'irm https://apinox.denisetiya.site/install.ps1 | iex')">Copy</button>
+      <pre><code><span class="pr">PS></span> irm https://apinox.denisetiya.site/install.ps1 | iex</code></pre>
+    </div>
+
+    <h4>Manual Download</h4>
+    <p>Download from <a href="https://github.com/denisetiya/apinox/releases" target="_blank">GitHub Releases</a>:</p>
+    <table>
+      <tr><th>Platform</th><th>Binary</th></tr>
+      <tr><td>Linux x86_64</td><td><code>apinox-linux-x86_64</code></td></tr>
+      <tr><td>Linux ARM64</td><td><code>apinox-linux-aarch64</code></td></tr>
+      <tr><td>macOS x86_64</td><td><code>apinox-macos-x86_64</code></td></tr>
+      <tr><td>macOS ARM64</td><td><code>apinox-macos-aarch64</td></tr>
+      <tr><td>Windows x86_64</td><td><code>apinox-windows-x86_64.exe</code></td></tr>
+    </table>
+
+    <div class="info-box tip">
+      <div class="label">Tip</div>
+      <p>After installing, run <code>apinox --help</code> to see all available commands.</p>
+    </div>
+
+    <h3 id="quick-start">Quick Start</h3>
+    <p>Create a schema file and generate all 7 output formats in under 30 seconds:</p>
+
+    <h4>1. Create <code>api-spec.yml</code></h4>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyT(this,document.getElementById('qs-schema').textContent)">Copy</button>
+      <pre id="qs-schema"><code><span class="key">apinox</span>: <span class="str">"1.0"</span>
+<span class="key">name</span>: my-api
+<span class="key">version</span>: <span class="num">1.0.0</span>
+<span class="key">description</span>: My first API
+<span class="key">base_url</span>: https://api.example.com/v1
+
+<span class="key">auth</span>:
+  <span class="key">default</span>: bearer
+  <span class="key">schemes</span>:
+    - <span class="key">id</span>: bearer
+      <span class="key">type</span>: http
+      <span class="key">scheme</span>: bearer
+      <span class="key">header</span>: Authorization
+      <span class="key">prefix</span>: <span class="str">"Bearer "</span>
+
+<span class="key">groups</span>:
+  - <span class="key">id</span>: users
+    <span class="key">name</span>: Users
+
+<span class="key">endpoints</span>:
+  - <span class="key">id</span>: list-users
+    <span class="key">name</span>: List Users
+    <span class="key">group</span>: users
+    <span class="key">method</span>: GET
+    <span class="key">path</span>: /users
+    <span class="key">responses</span>:
+      - <span class="key">status</span>: <span class="num">200</span>
+        <span class="key">description</span>: Success
+        <span class="key">examples</span>:
+          - <span class="key">name</span>: default
+            <span class="key">value</span>:
+              <span class="key">id</span>: usr_1
+              <span class="key">name</span>: John Doe
+              <span class="key">email</span>: john@example.com</code></pre>
+    </div>
+
+    <h4>2. Validate</h4>
+    <div class="cmd-card" onclick="copyT(this,'apinox validate api-spec.yml')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox validate api-spec.yml</span>
+      <span class="descr">Check for errors</span>
+    </div>
+
+    <h4>3. Build all formats</h4>
+    <div class="cmd-card" onclick="copyT(this,'apinox build api-spec.yml -o ./dist')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox build api-spec.yml -o ./dist</span>
+      <span class="descr">Generate everything</span>
+    </div>
+
+    <h4>4. See the output</h4>
+    <pre><code>dist/
+├── docs/
+│   ├── my-api.md                   <span class="cmt"># Markdown docs</span>
+│   └── my-api.scalar.html           <span class="cmt"># Interactive docs</span>
+├── hurl/
+│   ├── my-api.hurl                  <span class="cmt"># Hurl test scripts</span>
+│   └── my-api.sh                    <span class="cmt"># Curl commands</span>
+├── insomnia/
+│   └── my-api.insomnia.json         <span class="cmt"># Insomnia import</span>
+├── openapi/
+│   └── my-api.openapi.yaml          <span class="cmt"># OpenAPI 3.1</span>
+└── postman/
+    └── my-api.postman_collection.json <span class="cmt"># Postman collection</span></code></pre>
+
+    <h3 id="how-it-works">How It Works</h3>
+    <p>Apinox uses a <strong>schema-first</strong> approach:</p>
+    <ol>
+      <li><strong>Write</strong> — Define your API in YAML/JSON with endpoints, auth, parameters, and response examples</li>
+      <li><strong>Validate</strong> — Catch missing fields, duplicate IDs, broken references before generating</li>
+      <li><strong>Generate</strong> — Produce 7 output formats from a single source of truth</li>
+      <li><strong>Import</strong> — Convert existing OpenAPI/Swagger specs into Apinox schema</li>
+      <li><strong>Sync</strong> — Push generated Postman collections directly to your workspace</li>
+    </ol>
+  </section>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SCHEMA REFERENCE -->
+  <!-- ════════════════════════════════════════════ -->
+  <section id="schema">
+    <h2>Schema Reference</h2>
+    <p>The Apinox schema is the single source of truth for your API. It's a YAML (or JSON) file that describes every endpoint, parameter, authentication method, and response.</p>
+
+    <h3 id="schema-root">Root Fields</h3>
+    <table>
+      <tr><th>Field</th><th>Required</th><th>Description</th></tr>
+      <tr><td><code>apinox</code></td><td>✓</td><td>Schema spec version. Must be <code>"1.0"</code>.</td></tr>
+      <tr><td><code>name</code></td><td>✓</td><td>API name. Used for output filenames.</td></tr>
+      <tr><td><code>version</code></td><td>✓</td><td>API version (e.g. <code>1.0.0</code>, <code>2.4.0</code>).</td></tr>
+      <tr><td><code>description</code></td><td></td><td>Brief description of the API.</td></tr>
+      <tr><td><code>base_url</code></td><td></td><td>Default base URL for all endpoints (e.g. <code>https://api.example.com/v1</code>).</td></tr>
+    </table>
+
+    <div class="info-box">
+      <div class="label">Example</div>
+      <pre><code><span class="key">apinox</span>: <span class="str">"1.0"</span>
+<span class="key">name</span>: atomix-cloud-api
+<span class="key">version</span>: <span class="num">2.4.0</span>
+<span class="key">description</span>: Atomix Cloud platform API
+<span class="key">base_url</span>: https://api.denisetiya.site/v1</code></pre>
+    </div>
+
+    <h3 id="schema-auth">Authentication</h3>
+    <p>Define auth schemes globally. Endpoints can override or disable auth per-request.</p>
+
+    <table>
+      <tr><th>Field</th><th>Description</th></tr>
+      <tr><td><code>default</code></td><td>Default auth scheme ID applied to all endpoints (unless overridden).</td></tr>
+      <tr><td><code>schemes[]</code></td><td>List of auth scheme definitions.</td></tr>
+    </table>
+
+    <p><strong>Auth scheme types:</strong></p>
+    <table>
+      <tr><th>Type</th><th>Fields</th><th>Example</th></tr>
+      <tr>
+        <td><code>http</code> (Bearer)</td>
+        <td><code>scheme: bearer</code>, <code>header: Authorization</code>, <code>prefix: "Bearer "</code></td>
+        <td>JWT tokens</td>
+      </tr>
+      <tr>
+        <td><code>apiKey</code></td>
+        <td><code>key: X-API-Key</code>, <code>in_location: header</code></td>
+        <td>API key auth</td>
+      </tr>
+      <tr>
+        <td><code>basic</code></td>
+        <td><code>scheme: basic</code></td>
+        <td>Basic auth</td>
+      </tr>
+      <tr>
+        <td><code>oauth2</code></td>
+        <td>Custom fields</td>
+        <td>OAuth 2.0</td>
+      </tr>
+    </table>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyT(this,document.getElementById('ex-auth').textContent)">Copy</button>
+      <pre id="ex-auth"><code><span class="key">auth</span>:
+  <span class="key">default</span>: bearer
+  <span class="key">schemes</span>:
+    - <span class="key">id</span>: bearer
+      <span class="key">type</span>: http
+      <span class="key">scheme</span>: bearer
+      <span class="key">header</span>: Authorization
+      <span class="key">prefix</span>: <span class="str">"Bearer "</span>
+      <span class="key">description</span>: JWT Bearer token
+    - <span class="key">id</span>: api_key
+      <span class="key">type</span>: apiKey
+      <span class="key">key</span>: X-API-Key
+      <span class="key">in_location</span>: header</code></pre>
+    </div>
+
+    <p><strong>Per-endpoint auth override:</strong></p>
+    <pre><code><span class="key">endpoints</span>:
+  - <span class="key">id</span>: public-endpoint
+    <span class="key">auth</span>: <span class="str">~</span>              <span class="cmt"># null = no auth required</span>
+  - <span class="key">id</span>: admin-only
+    <span class="key">auth</span>: api_key          <span class="cmt"># use api_key scheme instead of default</span></code></pre>
+
+    <h3 id="schema-env">Environments</h3>
+    <p>Define multiple environments (production, staging, development) with different base URLs and variables.</p>
+
+    <table>
+      <tr><th>Field</th><th>Description</th></tr>
+      <tr><td><code>name</code></td><td>Environment name (e.g. <code>production</code>, <code>development</code>).</td></tr>
+      <tr><td><code>base_url</code></td><td>Base URL for this environment.</td></tr>
+      <tr><td><code>vars</code></td><td>Key-value variables for Postman/Insomnia environments.</td></tr>
+    </table>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyT(this,document.getElementById('ex-env').textContent)">Copy</button>
+      <pre id="ex-env"><code><span class="key">environments</span>:
+  - <span class="key">name</span>: production
+    <span class="key">base_url</span>: https://api.example.com/v1
+    <span class="key">vars</span>:
+      <span class="key">TOKEN</span>: prod_token_value
+  - <span class="key">name</span>: development
+    <span class="key">base_url</span>: http://localhost:8520/v1
+    <span class="key">vars</span>:
+      <span class="key">TOKEN</span>: dev_token_local</code></pre>
+    </div>
+
+    <h3 id="schema-groups">Groups</h3>
+    <p>Organize endpoints into logical groups. Groups appear as folders in Postman/Insomnia.</p>
+
+    <table>
+      <tr><th>Field</th><th>Description</th></tr>
+      <tr><td><code>id</code></td><td>Unique group identifier.</td></tr>
+      <tr><td><code>name</code></td><td>Display name.</td></tr>
+      <tr><td><code>description</code></td><td>Optional description.</td></tr>
+      <tr><td><code>auth</code></td><td>Optional auth override for all endpoints in this group.</td></tr>
+    </table>
+
+    <h3 id="schema-endpoints">Endpoints</h3>
+    <p>The core of the schema. Each endpoint describes a single API route.</p>
+
+    <table>
+      <tr><th>Field</th><th>Required</th><th>Description</th></tr>
+      <tr><td><code>id</code></td><td>✓</td><td>Unique endpoint identifier.</td></tr>
+      <tr><td><code>name</code></td><td>✓</td><td>Human-readable name.</td></tr>
+      <tr><td><code>group</code></td><td></td><td>Group ID this endpoint belongs to.</td></tr>
+      <tr><td><code>method</code></td><td>✓</td><td>HTTP method: <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code>, <code>HEAD</code>, <code>OPTIONS</code>.</td></tr>
+      <tr><td><code>path</code></td><td>✓</td><td>URL path with optional <code>{param}</code> placeholders.</td></tr>
+      <tr><td><code>description</code></td><td></td><td>Endpoint description (supports multi-line <code>|</code>).</td></tr>
+      <tr><td><code>deprecated</code></td><td></td><td>Mark as deprecated (<code>true</code>/<code>false</code>).</td></tr>
+      <tr><td><code>tags</code></td><td></td><td>List of tags for filtering.</td></tr>
+      <tr><td><code>auth</code></td><td></td><td>Auth scheme override (<code>null</code> = no auth, omit = use default).</td></tr>
+      <tr><td><code>path_params</code></td><td></td><td>Path parameter definitions.</td></tr>
+      <tr><td><code>query_params</code></td><td></td><td>Query parameter definitions.</td></tr>
+      <tr><td><code>headers</code></td><td></td><td>Request headers.</td></tr>
+      <tr><td><code>body</code></td><td></td><td>Request body definition.</td></tr>
+      <tr><td><code>responses</code></td><td></td><td>Response definitions (at least one recommended).</td></tr>
+      <tr><td><code>rate_limit</code></td><td></td><td>Rate limit info: <code>requests</code> + <code>window</code>.</td></tr>
+      <tr><td><code>servers</code></td><td></td><td>Per-endpoint server URL overrides.</td></tr>
+    </table>
+
+    <div class="info-box warn">
+      <div class="label">Important</div>
+      <p>Response examples <strong>must</strong> use <code>examples:</code> format with <code>name</code> and <code>value</code>. Do NOT use <code>body:</code> — it produces empty responses in generated output.</p>
+    </div>
+
+    <h4>Path Parameters</h4>
+    <p>Use <code>{param_name}</code> in the path and declare the parameter details:</p>
+    <pre><code><span class="key">path_params</span>:
+  - <span class="key">name</span>: user_id
+    <span class="key">type</span>: string
+    <span class="key">required</span>: <span class="num">true</span>
+    <span class="key">pattern</span>: <span class="str">"^usr_[a-zA-Z0-9]+$"</span>
+    <span class="key">description</span>: User ID
+    <span class="key">example</span>: usr_abc123</code></pre>
+
+    <h4>Query Parameters</h4>
+    <pre><code><span class="key">query_params</span>:
+  - <span class="key">name</span>: page
+    <span class="key">type</span>: integer
+    <span class="key">required</span>: <span class="num">false</span>
+    <span class="key">min</span>: <span class="num">1</span>
+    <span class="key">max</span>: <span class="num">100</span>
+    <span class="key">default</span>: <span class="num">1</span>
+  - <span class="key">name</span>: sort
+    <span class="key">type</span>: string
+    <span class="key">enum</span>: [asc, desc]
+    <span class="key">default</span>: asc</code></pre>
+
+    <h3 id="schema-body">Request Body</h3>
+    <p>Apinox supports multiple body types:</p>
+
+    <table>
+      <tr><th>Type</th><th>Use When</th><th>Schema Format</th></tr>
+      <tr><td><code>json</code></td><td>REST API payloads</td><td><code>schema</code> map with field definitions</td></tr>
+      <tr><td><code>formdata</code></td><td>File uploads, mixed data</td><td><code>fields</code> list with file support</td></tr>
+      <tr><td><code>urlencoded</code></td><td>HTML forms</td><td><code>schema</code> map (same as json)</td></tr>
+      <tr><td><code>binary</code></td><td>Raw file upload</td><td><code>mime_type</code> and <code>encoding</code></td></tr>
+      <tr><td><code>raw</code></td><td>Custom content types</td><td><code>content_type</code> override</td></tr>
+    </table>
+
+    <p><strong>JSON body example:</strong></p>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyT(this,document.getElementById('ex-body').textContent)">Copy</button>
+      <pre id="ex-body"><code><span class="key">body</span>:
+  <span class="key">type</span>: json
+  <span class="key">required</span>: <span class="num">true</span>
+  <span class="key">schema</span>:
+    <span class="key">email</span>:
+      <span class="key">type</span>: email
+      <span class="key">required</span>: <span class="num">true</span>
+      <span class="key">description</span>: User email
+    <span class="key">password</span>:
+      <span class="key">type</span>: string
+      <span class="key">required</span>: <span class="num">true</span>
+      <span class="key">sensitive</span>: <span class="num">true</span>
+      <span class="key">min_length</span>: <span class="num">8</span>
+    <span class="key">role</span>:
+      <span class="key">type</span>: string
+      <span class="key">required</span>: <span class="num">false</span>
+      <span class="key">enum</span>: [user, admin]
+      <span class="key">default</span>: user
+  <span class="key">examples</span>:
+    - <span class="key">name</span>: valid_user
+      <span class="key">value</span>:
+        <span class="key">email</span>: user@example.com
+        <span class="key">password</span>: SuperSecret123!
+        <span class="key">role</span>: admin</code></pre>
+    </div>
+
+    <p><strong>File upload (form-data) example:</strong></p>
+    <pre><code><span class="key">body</span>:
+  <span class="key">type</span>: formdata
+  <span class="key">fields</span>:
+    - <span class="key">name</span>: avatar
+      <span class="key">type</span>: file
+      <span class="key">required</span>: <span class="num">true</span>
+      <span class="key">accept</span>: [image/jpeg, image/png]
+      <span class="key">max_size_mb</span>: <span class="num">5</span>
+      <span class="key">description</span>: Avatar image file
+    - <span class="key">name</span>: crop
+      <span class="key">type</span>: string
+      <span class="key">default</span>: square
+      <span class="key">enum</span>: [square, circle]</code></pre>
+
+    <p><strong>Field schema types:</strong></p>
+    <table>
+      <tr><th>Type</th><th>Description</th><th>Validators</th></tr>
+      <tr><td><code>string</code></td><td>Text value</td><td><code>min_length</code>, <code>max_length</code>, <code>pattern</code>, <code>enum</code></td></tr>
+      <tr><td><code>integer</code></td><td>Whole number</td><td><code>min</code>, <code>max</code></td></tr>
+      <tr><td><code>float</code></td><td>Decimal number</td><td><code>min</code>, <code>max</code></td></tr>
+      <tr><td><code>boolean</code></td><td>True/false</td><td>—</td></tr>
+      <tr><td><code>email</code></td><td>Email address</td><td>Auto-format in Postman</td></tr>
+      <tr><td><code>date</code></td><td>Date (ISO 8601)</td><td><code>format</code></td></tr>
+      <tr><td><code>dateTime</code></td><td>Datetime (ISO 8601)</td><td><code>format</code></td></tr>
+      <tr><td><code>uri</code></td><td>URL</td><td>Auto-format in Postman</td></tr>
+      <tr><td><code>uuid</code></td><td>UUID v4</td><td>Auto-generate in Postman</td></tr>
+      <tr><td><code>file</code></td><td>Binary file (form-data only)</td><td><code>accept</code>, <code>max_size_mb</code></td></tr>
+    </table>
+
+    <h3 id="schema-responses">Responses</h3>
+    <p>Define success and error responses with examples. Multiple response status codes per endpoint.</p>
+
+    <pre><code><span class="key">responses</span>:
+  - <span class="key">status</span>: <span class="num">200</span>
+    <span class="key">description</span>: User found
+    <span class="key">content_type</span>: application/json
+    <span class="key">headers</span>:
+      - <span class="key">name</span>: X-RateLimit-Remaining
+        <span class="key">description</span>: Remaining rate limit
+    <span class="key">schema</span>:
+      <span class="key">id</span>:
+        <span class="key">type</span>: string
+    <span class="key">examples</span>:
+      - <span class="key">name</span>: success
+        <span class="key">value</span>:
+          <span class="key">id</span>: usr_abc123
+          <span class="key">name</span>: John Doe
+  - <span class="key">status</span>: <span class="num">404</span>
+    <span class="key">description</span>: Not found
+    <span class="key">examples</span>:
+      - <span class="key">name</span>: not_found
+        <span class="key">value</span>:
+          <span class="key">error</span>: not_found
+          <span class="key">message</span>: User not found</code></pre>
+
+    <h3 id="schema-errors">Error Patterns</h3>
+    <p>Define reusable error responses to avoid repetition:</p>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyT(this,document.getElementById('ex-errors').textContent)">Copy</button>
+      <pre id="ex-errors"><code><span class="key">error_responses</span>:
+  <span class="key">patterns</span>:
+    - <span class="key">id</span>: unauthorized
+      <span class="key">status</span>: <span class="num">401</span>
+      <span class="key">description</span>: Missing or invalid token
+      <span class="key">example</span>:
+        <span class="key">error</span>: unauthorized
+        <span class="key">message</span>: Authentication required
+    - <span class="key">id</span>: not_found
+      <span class="key">status</span>: <span class="num">404</span>
+      <span class="key">example</span>:
+        <span class="key">error</span>: not_found
+        <span class="key">message</span>: Resource not found
+
+<span class="cmt"># In endpoints, reference via use_pattern:</span>
+<span class="key">endpoints</span>:
+  - <span class="key">id</span>: get-user
+    <span class="key">responses</span>:
+      - <span class="key">status</span>: <span class="num">200</span>
+        <span class="key">examples</span>:
+          - <span class="key">name</span>: default
+            <span class="key">value</span>: { <span class="key">id</span>: usr_1 }
+      - <span class="key">status</span>: <span class="num">401</span>
+        <span class="key">use_pattern</span>: unauthorized         <span class="cmt"># ← reuses error pattern</span>
+      - <span class="key">status</span>: <span class="num">404</span>
+        <span class="key">use_pattern</span>: not_found</code></pre>
+    </div>
+
+    <h3 id="schema-includes">Modular Schema Includes</h3>
+    <p>Split large APIs across multiple files. Useful for team workflows or organizing by domain.</p>
+
+    <pre><code><span class="cmt"># ── main.yml ──</span>
+<span class="key">name</span>: enterprise-api
+<span class="key">version</span>: <span class="num">3.0.0</span>
+<span class="key">apinox</span>: <span class="str">"1.0"</span>
+
+<span class="key">includes</span>:
+  - <span class="key">path</span>: ./includes/auth.yml
+  - <span class="key">path</span>: ./includes/users.yml
+    <span class="key">prefix</span>: /v3          <span class="cmt"># Prefix all endpoint paths</span>
+  - <span class="key">path</span>: ./includes/orders.yml</code></pre>
+
+    <pre><code><span class="cmt"># ── includes/users.yml ──</span>
+<span class="key">endpoints</span>:
+  - <span class="key">id</span>: list-users
+    <span class="key">method</span>: GET
+    <span class="key">path</span>: /users
+    <span class="key">responses</span>:
+      - <span class="key">status</span>: <span class="num">200</span>
+        <span class="key">description</span>: OK</code></pre>
+
+    <h3 id="schema-changelog">Changelog</h3>
+    <p>Track API changes directly in the schema. Used by the <code>diff</code> command to generate human-readable change logs.</p>
+
+    <pre><code><span class="key">changelog</span>:
+  - <span class="key">version</span>: <span class="num">2.0.0</span>
+    <span class="key">date</span>: <span class="str">2026-06-18</span>
+    <span class="key">changes</span>:
+      - <span class="key">endpoint</span>: list-users
+        <span class="key">description</span>: Added cursor pagination
+      - <span class="key">endpoint</span>: create-user
+        <span class="key">description</span>: Added role field
+        <span class="key">from_type</span>: user
+        <span class="key">to_type</span>: admin
+  - <span class="key">version</span>: <span class="num">1.0.0</span>
+    <span class="key">date</span>: <span class="str">2026-06-01</span>
+    <span class="key">changes</span>:
+      - <span class="key">endpoint</span>: list-users
+        <span class="key">description</span>: Initial implementation</code></pre>
+  </section>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- CLI REFERENCE -->
+  <!-- ════════════════════════════════════════════ -->
+  <section id="cli">
+    <h2>CLI Reference</h2>
+    <p>Seven commands. One binary. Every command supports <code>--help</code> for detailed options.</p>
+
+    <h3 id="cli-validate">Validate</h3>
+    <p>Check your schema for errors before generating. Catches:</p>
+    <ul>
+      <li>Missing required fields (name, version)</li>
+      <li>Duplicate endpoint/group IDs</li>
+      <li>Broken auth scheme references</li>
+      <li>Path-parameter mismatches (<code>{id}</code> in path but not declared)</li>
+      <li>Invalid HTTP methods</li>
+      <li>Unused auth schemes (warning)</li>
+      <li>Missing response examples (warning)</li>
+    </ul>
+
+    <div class="cmd-card" onclick="copyT(this,'apinox validate api-spec.yml')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox validate api-spec.yml</span>
+      <span class="descr">Text output (default)</span>
+    </div>
+    <div class="cmd-card" onclick="copyT(this,'apinox validate api-spec.yml --format json')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox validate api-spec.yml --format json</span>
+      <span class="descr">JSON output (CI-friendly)</span>
+    </div>
+
+    <p><strong>Exit codes:</strong> <code>0</code> = valid (warnings OK), <code>1</code> = errors found.</p>
+
+    <h3 id="cli-build">Build</h3>
+    <p>Generate output files from your schema. Can produce one format or all seven at once.</p>
+
+    <div class="cmd-card" onclick="copyT(this,'apinox build api-spec.yml')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox build api-spec.yml</span>
+      <span class="descr">All formats, output to ./dist</span>
+    </div>
+    <div class="cmd-card" onclick="copyT(this,'apinox build api-spec.yml -o ./docs -f postman')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox build api-spec.yml -o ./docs -f postman</span>
+      <span class="descr">Single format</span>
+    </div>
+    <div class="cmd-card" onclick="copyT(this,'apinox build api-spec.yml --skip-validate')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox build api-spec.yml --skip-validate</span>
+      <span class="descr">Skip validation (build anyway)</span>
+    </div>
+
+    <p><strong>Format values:</strong> <code>postman</code>, <code>openapi</code>, <code>markdown</code>, <code>scalar</code>, <code>insomnia</code>, <code>hurl</code>, <code>all</code> (default).</p>
+
+    <h3 id="cli-watch">Watch</h3>
+    <p>Auto-rebuild your docs whenever the schema file changes. Uses filesystem notifications with 300ms debounce.</p>
+
+    <div class="cmd-card" onclick="copyT(this,'apinox watch api-spec.yml -o ./dist')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox watch api-spec.yml -o ./dist</span>
+    </div>
+
+    <h3 id="cli-diff">Diff</h3>
+    <p>Show changes between two versions. Uses <code>changelog</code> entries in the schema.</p>
+
+    <div class="cmd-card" onclick="copyT(this,'apinox diff api-spec.yml 1.0.0 2.0.0')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox diff api-spec.yml 1.0.0 2.0.0</span>
+      <span class="descr">Markdown output</span>
+    </div>
+    <div class="cmd-card" onclick="copyT(this,'apinox diff api-spec.yml 1.0.0 2.0.0 --format text')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox diff api-spec.yml 1.0.0 2.0.0 --format text</span>
+      <span class="descr">Plain text output</span>
+    </div>
+
+    <h3 id="cli-migrate">Migrate</h3>
+    <p>Generate a migration guide by comparing two actual schema files (not changelog entries).</p>
+
+    <div class="cmd-card" onclick="copyT(this,'apinox migrate api-v1.yml api-v2.yml')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox migrate api-v1.yml api-v2.yml</span>
+    </div>
+    <div class="cmd-card" onclick="copyT(this,'apinox migrate api-v1.yml api-v2.yml -o migration-guide.md')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox migrate api-v1.yml api-v2.yml -o migration-guide.md</span>
+    </div>
+
+    <h3 id="cli-import">Import</h3>
+    <p>Convert an existing OpenAPI 3.x or Swagger 2.0 spec into Apinox schema format.</p>
+
+    <div class="cmd-card" onclick="copyT(this,'apinox import swagger.json -o api-spec.yml')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox import swagger.json -o api-spec.yml</span>
+    </div>
+
+    <h3 id="cli-sync">Postman Sync</h3>
+    <p>Push generated Postman collections directly to your Postman workspace. Supports creating new collections or updating existing ones.</p>
+
+    <div class="cmd-card" onclick="copyT(this,'apinox sync api-spec.yml --postman-key PMAK-xxx --workspace wkspc_xxx --collection-name "My API"')">
+      <span class="prompt">$</span>
+      <span class="cmd">apinox sync api-spec.yml --postman-key PMAK-xxx --workspace wkspc_xxx --collection-name "My API"</span>
+    </div>
+
+    <p><strong>Config file alternative</strong> — create <code>.apinox.toml</code>:</p>
+    <pre><code><span class="key">[sync.postman]</span>
+<span class="key">api_key</span> = <span class="str">"PMAK-xxx"</span>
+<span class="key">workspace_id</span> = <span class="str">"1a2b3c4d-xxxx-xxxx-xxxx-xxxxxxxxxxxx"</span>
+<span class="key">collection_id</span> = <span class="str">"clctn_xxx"</span></code></pre>
+
+    <p>Then simply run: <code>apinox sync api-spec.yml</code></p>
+  </section>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- OUTPUT FORMATS -->
+  <!-- ════════════════════════════════════════════ -->
+  <section id="outputs">
+    <h2>Output Formats</h2>
+    <p>Each format is generated into a separate subdirectory. Here's what you get:</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="ico" style="background:#ff6c3718"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff6c37" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
+        <h4>Postman</h4>
+        <p>Collection v2.1 with auth, envs, examples</p>
+      </div>
+      <div class="card">
+        <div class="ico" style="background:#22c55e18"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></div>
+        <h4>OpenAPI 3.1</h4>
+        <p>Standard spec for Swagger UI, Redoc</p>
+      </div>
+      <div class="card">
+        <div class="ico" style="background:#3b82f618"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <h4>Markdown</h4>
+        <p>Human-readable docs with code samples</p>
+      </div>
+      <div class="card">
+        <div class="ico" style="background:#a855f718"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg></div>
+        <h4>Scalar</h4>
+        <p>Interactive HTML docs, test endpoints live</p>
+      </div>
+      <div class="card">
+        <div class="ico" style="background:#f59e0b18"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+        <h4>Insomnia</h4>
+        <p>Workspace with environments</p>
+      </div>
+      <div class="card">
+        <div class="ico" style="background:#ef444418"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+        <h4>Hurl</h4>
+        <p>HTTP test scripts for CI pipelines</p>
+      </div>
+      <div class="card">
+        <div class="ico" style="background:#06b6d418"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+        <h4>curl</h4>
+        <p>Bash scripts with curl commands</p>
+      </div>
+    </div>
+
+    <h3>Example Build Output</h3>
+    <pre><code><span class="key">$</span> apinox build api-spec.yml -o dist/
+
+  <span class="ok">Validated</span> <span class="a">14 endpoints</span>, 6 groups, 2 auth schemes
+  <span class="o">0 errors, 2 warnings (missing examples)</span>
+
+  <span class="ok">Generated</span> <span class="a">7 formats</span> to dist/:
+
+  dist/
+  ├── postman/     apinox.postman_collection.json     (18KB)
+  ├── openapi/     apinox.openapi.yaml                 (22KB)
+  ├── docs/        apinox.md                           (10KB)
+  ├── docs/        apinox.scalar.html                  (34KB)
+  ├── insomnia/    apinox.insomnia.json                (11KB)
+  └── hurl/        apinox.hurl + .sh                    (8KB)
+
+  <span class="ok">Done</span> in <span class="n">9ms</span></code></pre>
+  </section>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- GUIDES -->
+  <!-- ════════════════════════════════════════════ -->
+  <section id="guides">
+    <h2>Guides</h2>
+
+    <h3 id="guides-modular">Modular Schemas</h3>
+    <p>For large APIs with 20+ endpoints, split your schema across multiple files:</p>
+
+    <ol>
+      <li>Create a <strong>main schema</strong> with global config (auth, groups, environments)</li>
+      <li>Create <strong>domain modules</strong> with endpoint definitions only</li>
+      <li>Reference them via <code>includes</code> in the main schema</li>
+    </ol>
+
+    <pre><code><span class="cmt"># Project structure</span>
+api/
+├── api-spec.yml          <span class="cmt"># Main schema with includes</span>
+├── includes/
+│   ├── auth.yml          <span class="cmt"># Auth endpoints</span>
+│   ├── users.yml         <span class="cmt"># User endpoints</span>
+│   └── payments.yml      <span class="cmt"># Payment endpoints (prefixed)</span>
+└── dist/                 <span class="cmt"># Generated output</span></code></pre>
+
+    <p><strong>Included files can contain:</strong></p>
+    <ul>
+      <li><code>endpoints</code> — merged into main endpoints list</li>
+      <li><code>auth</code> — additional auth scheme definitions (merged)</li>
+      <li><code>environments</code> — additional environments (merged)</li>
+    </ul>
+
+    <div class="info-box tip">
+      <div class="label">Tip</div>
+      <p>Use the <code>prefix</code> field to add a path prefix to all endpoints from an include. Useful for versioning: <code>prefix: /v2</code>.</p>
+    </div>
+
+    <h3 id="guides-ci">CI/CD Integration</h3>
+    <p>Validate your API schema in CI pipelines to catch breaking changes early:</p>
+
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyT(this,document.getElementById('ci-example').textContent)">Copy</button>
+      <pre id="ci-example"><code><span class="cmt"># .github/workflows/validate-schema.yml</span>
+<span class="key">name</span>: Validate API Schema
+<span class="key">on</span>: [push, pull_request]
+
+<span class="key">jobs</span>:
+  <span class="fn">validate</span>:
+    <span class="key">runs-on</span>: ubuntu-latest
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: actions/checkout@v4
+
+      - <span class="key">name</span>: Download apinox
+        <span class="key">run</span>: |
+          curl -sL https://github.com/denisetiya/apinox/releases/latest/download/apinox-linux-x86_64 -o apinox
+          chmod +x apinox
+
+      - <span class="key">name</span>: Validate schema
+        <span class="key">run</span>: ./apinox validate docs/api-spec.yml --format json</code></pre>
+    </div>
+
+    <p><strong>Release workflow:</strong> Push a <code>v*</code> tag to trigger automatic builds for all platforms:</p>
+    <pre><code><span class="pr">$</span> git tag v1.0.0
+<span class="pr">$</span> git push origin v1.0.0</code></pre>
+
+    <p>The <code>.github/workflows/release.yml</code> workflow builds for Linux, macOS, and Windows (x86_64 + ARM64), attaches binaries to a GitHub Release.</p>
+  </section>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- FAQ -->
+  <!-- ════════════════════════════════════════════ -->
+  <section id="faq">
+    <h2>FAQ</h2>
+
+    <h4>What's the difference between <code>diff</code> and <code>migrate</code>?</h4>
+    <p><code>diff</code> reads changelog entries <em>inside</em> the schema to show version-to-version changes. <code>migrate</code> compares two actual schema files to generate a migration guide — useful when you have separate files for v1 and v2.</p>
+
+    <h4>Can I use JSON instead of YAML?</h4>
+    <p>Yes. Apinox accepts both <code>.yml</code> and <code>.json</code> schema files. The format is auto-detected by file extension.</p>
+
+    <h4>How do I mark a field as sensitive (passwords, tokens)?</h4>
+    <p>Set <code>sensitive: true</code> on the field. In Postman collections, sensitive fields use <code>type: hidden</code> (field masked in UI). In OpenAPI output, they're marked with <code>writeOnly: true</code>.</p>
+
+    <h4>Can I have per-endpoint server URLs?</h4>
+    <p>Yes. Use the <code>servers</code> block on an endpoint to override the base URL for specific environments:</p>
+    <pre><code><span class="key">servers</span>:
+  <span class="key">production</span>: https://api.example.com/v2
+  <span class="key">development</span>: http://localhost:9000</code></pre>
+
+    <h4>Why is my Postman collection empty?</h4>
+    <p>You're likely using <code>body:</code> instead of <code>examples:</code> in your response definitions. Apinox expects <code>examples: [{name: ..., value: ...}]</code> format.</p>
+
+    <h4>How do I update an existing Postman collection?</h4>
+    <p>Use <code>--collection-id</code> to specify the existing collection ID, or set it in <code>.apinox.toml</code>. Apinox will update it in-place. You can also use <code>--collection-name</code> to auto-find and update.</p>
+
+    <h4>Does Apinox support WebSocket or GraphQL?</h4>
+    <p>Currently REST-focused. The schema format supports standard HTTP methods. WebSocket and GraphQL support are on the roadmap.</p>
+
+    <h4>Where can I report bugs or request features?</h4>
+    <p>Open an issue on <a href="https://github.com/denisetiya/apinox/issues" target="_blank">GitHub Issues</a>.</p>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <div class="docs-footer">
+    <p>&copy; 2026 Apinox. Built by <a href="https://denisetiya.site" target="_blank">Deni Setiya</a>.</p>
+    <div>
+      <a href="https://github.com/denisetiya/apinox" target="_blank" style="margin-right:16px">GitHub</a>
+      <a href="/">Home</a>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // Copy helper
+  function copyT(el, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      el.textContent = 'Copied!';
+      el.classList.add('copied');
+      setTimeout(() => { el.textContent = 'Copy'; el.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // Mobile menu close
+  function closeM() {
+    document.getElementById('mobileMenu').classList.remove('open');
+  }
+
+  // Active sidebar link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const sidebarLinks = document.querySelectorAll('.sidebar nav a[href^="#"]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        sidebarLinks.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector(`.sidebar nav a[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '-80px 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+
+  // Close mobile menu on resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 900) document.getElementById('mobileMenu').classList.remove('open');
+  });
+</script>
+</body>
+</html>
