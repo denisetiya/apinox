@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apinox — API Schema → 7 Output Formats</title>
+  <meta name="description" content="Define your API once in YAML/JSON. Generate Postman, OpenAPI 3.1, Markdown, Scalar, Insomnia, Hurl, curl — from one schema." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-0: #050810;
+      --bg-1: #0a0f1c;
+      --bg-2: #111827;
+      --bg-3: #1e293b;
+      --border: #1e2a3a;
+      --border-light: #2a3a4e;
+      --text-0: #f8fafc;
+      --text-1: #94a3b8;
+      --text-2: #64748b;
+      --blue: #3b82f6;
+      --blue-dim: #2563eb;
+      --blue-glow: #3b82f630;
+      --blue-bg: #3b82f610;
+      --green: #22c55e;
+      --green-dim: #16a34a;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --purple: #a855f7;
+      --cyan: #06b6d4;
+      --pink: #ec4899;
+      --radius: 12px;
+      --radius-lg: 16px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-0);
+      color: var(--text-0);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    code, .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ── Ambient Background ── */
+    .ambient {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    }
+    .ambient .grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 0%, transparent 100%);
+    }
+    .ambient .glow-1 {
+      position: absolute; width: 600px; height: 600px;
+      background: radial-gradient(circle, #3b82f612, transparent 70%);
+      top: -200px; left: -100px;
+      animation: float 20s ease-in-out infinite;
+    }
+    .ambient .glow-2 {
+      position: absolute; width: 500px; height: 500px;
+      background: radial-gradient(circle, #a855f710, transparent 70%);
+      bottom: -150px; right: -100px;
+      animation: float 25s ease-in-out infinite reverse;
+    }
+    .ambient .glow-3 {
+      position: absolute; width: 400px; height: 400px;
+      background: radial-gradient(circle, #06b6d408, transparent 70%);
+      top: 40%; left: 50%;
+      animation: float 18s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      33% { transform: translate(30px, -20px); }
+      66% { transform: translate(-20px, 30px); }
+    }
+
+    /* ── Container ── */
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 20px;
+      position: relative; z-index: 1;
+    }
+
+    /* ── Nav ── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(5,8,16,0.82);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid rgba(30,42,58,0.5);
+      transition: background var(--transition);
+    }
+    .nav .container {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 800; font-size: 18px; letter-spacing: -0.5px;
+      color: var(--text-0);
+      text-decoration: none;
+    }
+    .nav-brand svg { width: 26px; height: 26px; flex-shrink: 0; }
+    .nav-links { display: flex; gap: 6px; align-items: center; }
+    .nav-links a {
+      color: var(--text-2); text-decoration: none;
+      font-size: 13px; font-weight: 500;
+      padding: 6px 14px; border-radius: 8px;
+      transition: all var(--transition);
+    }
+    .nav-links a:hover { color: var(--text-0); background: var(--bg-2); }
+    .nav-cta {
+      background: var(--blue) !important; color: #fff !important;
+      font-weight: 600 !important;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .nav-cta:hover { background: var(--blue-dim) !important; }
+    .nav-mobile-toggle {
+      display: none; background: none; border: none; cursor: pointer;
+      padding: 8px; border-radius: 8px; transition: background var(--transition);
+    }
+    .nav-mobile-toggle:hover { background: var(--bg-2); }
+    .nav-mobile-toggle svg { width: 22px; height: 22px; color: var(--text-1); }
+    .nav-mobile-menu {
+      display: none; position: fixed; top: 60px; left: 0; right: 0;
+      background: rgba(10,15,28,0.97); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px; z-index: 99;
+    }
+    .nav-mobile-menu.open { display: block; }
+    .nav-mobile-menu a {
+      display: block; padding: 12px 16px; color: var(--text-1);
+      text-decoration: none; font-size: 15px; font-weight: 500;
+      border-radius: 8px; transition: all var(--transition);
+    }
+    .nav-mobile-menu a:hover { color: var(--text-0); background: var(--bg-2); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-mobile-toggle { display: flex; }
+    }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 100px 20px 60px;
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--bg-1); border: 1px solid var(--border);
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 12px; font-weight: 600; color: var(--text-1);
+      margin-bottom: 28px;
+      animation: fadeUp 0.6s ease-out;
+    }
+    .hero-badge .pulse {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero h1 {
+      font-size: clamp(36px, 8vw, 76px);
+      font-weight: 900;
+      letter-spacing: -3px;
+      line-height: 1.02;
+      margin-bottom: 20px;
+      animation: fadeUp 0.6s ease-out 0.1s both;
+    }
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, #3b82f6, #06b6d4, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: clamp(15px, 2vw, 18px);
+      color: var(--text-1);
+      max-width: 520px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+      animation: fadeUp 0.6s ease-out 0.2s both;
+    }
+    .hero-actions {
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp 0.6s ease-out 0.3s both;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 26px; border-radius: 10px;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      text-decoration: none; cursor: pointer; border: none;
+      transition: all var(--transition);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 20px #3b82f640;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px #3b82f650;
+    }
+    .btn-ghost {
+      background: var(--bg-2); color: var(--text-0);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover {
+      background: var(--bg-3); border-color: var(--border-light);
+      transform: translateY(-2px);
+    }
+
+    /* ── Install Block ── */
+    .install-row {
+      margin-top: 40px;
+      animation: fadeUp 0.6s ease-out 0.4s both;
+    }
+    .install-block {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+    }
+    .install-block:hover { border-color: var(--blue); }
+    .install-block .prompt { color: var(--green); font-weight: 600; }
+    .install-block .cmd { color: var(--text-0); }
+    .install-block .cursor {
+      width: 2px; height: 16px; background: var(--blue);
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    .install-block .copy-hint {
+      position: absolute; top: -32px; left: 50%; transform: translateX(-50%);
+      background: var(--bg-3); color: var(--text-0); font-size: 11px;
+      padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--transition);
+      font-family: 'Inter', sans-serif;
+    }
+    .install-block:hover .copy-hint { opacity: 1; }
+    .install-block.copied .copy-hint { opacity: 1; color: var(--green); }
+
+    @media (max-width: 600px) {
+      .install-block { font-size: 11px; padding: 8px 14px; }
+    }
+
+    /* ── Section Common ── */
+    section { padding: 80px 0; }
+    @media (min-width: 769px) { section { padding: 100px 0; } }
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+      text-transform: uppercase; color: var(--blue);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 800; letter-spacing: -1.5px;
+      margin-bottom: 12px; line-height: 1.1;
+    }
+    .section-desc {
+      font-size: 16px; color: var(--text-1);
+      max-width: 480px; line-height: 1.6;
+    }
+    .section-header { text-align: center; margin-bottom: 48px; }
+    .section-header .section-desc { margin: 0 auto; }
+
+    /* ── Flow ── */
+    .flow-wrap {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; padding: 20px 0;
+    }
+    .flow-card {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 28px 20px;
+      width: 170px; text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .flow-card:hover {
+      border-color: var(--blue);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px #3b82f612;
+    }
+    .flow-card.primary {
+      border-color: #3b82f640;
+      background: linear-gradient(135deg, #0f1a2e, var(--bg-1));
+    }
+    .flow-card .icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+    }
+    .flow-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .flow-card p { font-size: 11px; color: var(--text-2); }
+    .flow-arrow {
+      flex-shrink: 0; width: 40px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-2);
+    }
+    .flow-arrow svg { width: 20px; height: 20px; }
+
+    @media (max-width: 640px) {
+      .flow-wrap { flex-direction: column; gap: 0; }
+      .flow-arrow { transform: rotate(90deg); padding: 6px 0; }
+      .flow-card { width: 100%; max-width: 280px; }
+    }
+
+    /* ── Feature Grid ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 900px) { .feature-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .feature-grid { grid-template-columns: 1fr; } }
+
+    .feature-card {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 28px;
+      transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+      border-color: var(--blue);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px #3b82f608;
+    }
+    .feature-card .icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+    }
+    .feature-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .feature-card p { font-size: 13px; color: var(--text-1); line-height: 1.55; }
+
+    /* ── Output Grid ── */
+    .output-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 900px) { .output-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 640px) { .output-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .output-card {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px 16px;
+      text-align: center; transition: all 0.3s ease;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .output-card:hover {
+      border-color: var(--blue); transform: translateY(-2px);
+    }
+    .output-card .ico {
+      width: 44px; height: 44px; border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .output-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .output-card .desc { font-size: 11px; color: var(--text-2); margin-bottom: 8px; }
+    .output-card .tag {
+      background: var(--bg-3); padding: 3px 8px; border-radius: 5px;
+      font-size: 10px; color: var(--text-1);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Code Panel ── */
+    .code-panel {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      max-width: 760px; margin: 0 auto;
+    }
+    .code-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 18px;
+      background: var(--bg-2); border-bottom: 1px solid var(--border);
+    }
+    .code-bar .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-bar .dot.r { background: #ef4444; }
+    .code-bar .dot.y { background: #f59e0b; }
+    .code-bar .dot.g { background: #22c55e; }
+    .code-bar .fname {
+      margin-left: 10px; font-size: 12px; color: var(--text-2);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .code-body { padding: 20px 22px; overflow-x: auto; }
+    .code-body pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px; line-height: 1.75; color: var(--text-1);
+    }
+    .code-body .kw { color: #c084fc; }
+    .code-body .str { color: #34d399; }
+    .code-body .num { color: #f59e0b; }
+    .code-body .cmt { color: #475569; font-style: italic; }
+    .code-body .key { color: #e2e8f0; }
+    .code-body .type { color: #f472b6; }
+
+    /* ── Terminal ── */
+    .terminal {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      max-width: 740px; margin: 0 auto;
+    }
+    .term-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px;
+      background: var(--bg-2); border-bottom: 1px solid var(--border);
+    }
+    .term-bar span { font-size: 12px; color: var(--text-2); font-family: 'JetBrains Mono', monospace; }
+    .term-body {
+      padding: 18px 22px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px; line-height: 1.8;
+    }
+    .term-body .p { color: var(--green); }
+    .term-body .c { color: var(--text-0); }
+    .term-body .o { color: var(--text-2); }
+    .term-body .ok { color: var(--green); }
+    .term-body .a { color: var(--blue); }
+    .term-body .n { color: var(--orange); }
+
+    /* ── CTA ── */
+    .cta-section {
+      text-align: center; padding: 80px 0 100px;
+    }
+    .cta-section h2 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 800; letter-spacing: -1.5px; margin-bottom: 14px;
+    }
+    .cta-section p {
+      font-size: 16px; color: var(--text-1); margin-bottom: 32px;
+    }
+    .cta-section .hero-actions { justify-content: center; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+    }
+    footer .container {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    footer p { font-size: 12px; color: var(--text-2); }
+    footer a { color: var(--text-1); text-decoration: none; transition: color var(--transition); }
+    footer a:hover { color: var(--blue); }
+    footer .links { display: flex; gap: 20px; }
+    footer .links a { font-size: 12px; }
+
+    @media (max-width: 480px) {
+      footer .container { flex-direction: column; text-align: center; }
+    }
+
+    /* ── Scroll Animations ── */
+    .reveal {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1; transform: translateY(0);
+    }
+
+    /* ── Stats ── */
+    .stats-row {
+      display: flex; justify-content: center; gap: 48px;
+      margin: 48px 0 0;
+      flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat .val { font-size: 28px; font-weight: 800; letter-spacing: -1px; color: var(--text-0); }
+    .stat .lbl { font-size: 12px; color: var(--text-2); font-weight: 500; margin-top: 2px; }
+
+    @media (max-width: 480px) {
+      .stats-row { gap: 24px; }
+      .stat .val { font-size: 22px; }
+    }
+
+    /* ── Platform Grid ── */
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 48px;
+    }
+    @media (max-width: 768px) { .platform-grid { grid-template-columns: 1fr; } }
+
+    .platform-card {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 16px;
+      display: flex; align-items: center; gap: 14px;
+      cursor: pointer; transition: all var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .platform-card:hover {
+      border-color: var(--blue); background: var(--bg-2);
+    }
+    .platform-card .p-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .platform-card .p-info { flex: 1; min-width: 0; }
+    .platform-card .p-name { font-size: 13px; font-weight: 600; }
+    .platform-card .p-cmd {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; color: var(--text-2); margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .platform-card .p-badge {
+      font-size: 10px; font-weight: 600;
+      padding: 2px 7px; border-radius: 4px;
+      background: var(--green); color: #000;
+      flex-shrink: 0;
+    }
+    .platform-card .p-copied {
+      position: absolute; inset: 0;
+      background: var(--bg-2); border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; color: var(--green);
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--transition);
+    }
+    .platform-card.copied .p-copied { opacity: 1; }
+
+    .install-alt {
+      margin-top: 12px; text-align: center;
+      font-size: 12px; color: var(--text-2);
+    }
+    .install-alt a { color: var(--text-1); text-decoration: underline; text-underline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <div class="ambient">
+    <div class="grid"></div>
+    <div class="glow-1"></div>
+    <div class="glow-2"></div>
+    <div class="glow-3"></div>
+  </div>
+
+  <!-- ═══ NAV ═══ -->
+  <nav class="nav">
+    <div class="container">
+      <a href="#" class="nav-brand">
+        <svg viewBox="0 0 26 26" fill="none">
+          <rect width="26" height="26" rx="5" fill="#3b82f6"/>
+          <path d="M6 8.5h14M6 13h9M6 17.5h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="20" cy="17.5" r="2.5" fill="#22c55e"/>
+        </svg>
+        Apinox
+      </a>
+      <div class="nav-links">
+        <a href="#how">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="#outputs">Outputs</a>
+        <a href="#cli">CLI</a>
+        <a href="https://github.com/denisetiya/apinox" class="nav-cta" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+      </div>
+      <button class="nav-mobile-toggle" onclick="document.getElementById('mobileMenu').classList.toggle('open')" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="nav-mobile-menu" id="mobileMenu">
+      <a href="#how" onclick="document.getElementById('mobileMenu').classList.remove('open')">How It Works</a>
+      <a href="#features" onclick="document.getElementById('mobileMenu').classList.remove('open')">Features</a>
+      <a href="#outputs" onclick="document.getElementById('mobileMenu').classList.remove('open')">Outputs</a>
+      <a href="#cli" onclick="document.getElementById('mobileMenu').classList.remove('open')">CLI</a>
+      <a href="https://github.com/denisetiya/apinox" target="_blank" rel="noopener" onclick="document.getElementById('mobileMenu').classList.remove('open')">GitHub</a>
+    </div>
+  </nav>
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="pulse"></span>
+      v0.2.0 — Rust CLI
+    </div>
+    <h1>One Schema.<br/><span class="gradient">Seven Outputs.</span></h1>
+    <p>Define your API once in YAML or JSON. Generate Postman, OpenAPI 3.1, Markdown, Scalar, Insomnia, Hurl, and curl — from a single source of truth.</p>
+    <div class="hero-actions">
+      <a href="#cli" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        Get Started
+      </a>
+      <a href="#how" class="btn btn-ghost">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 16 16 12 12 8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        How It Works
+      </a>
+    </div>
+    <div class="install-row">
+      <div class="install-block" id="installCmd" onclick="copyInstall()">
+        <span class="copy-hint">Click to copy</span>
+        <span class="prompt">$</span>
+        <span class="cmd">curl -sSL https://apinox.denisetiya.site/install.sh | bash</span>
+        <span class="cursor"></span>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="val">7</div><div class="lbl">Output Formats</div></div>
+
+      <div class="stat"><div class="val">1.8MB</div><div class="lbl">Binary Size</div></div>
+      <div class="stat"><div class="val">0</div><div class="lbl">Dependencies</div></div>
+    </div>
+
+    <!-- Platform Install Cards -->
+    <div class="platform-grid">
+      <div class="platform-card" onclick="copyCmd(this, 'curl -sSL https://apinox.denisetiya.site/install.sh | bash')">
+        <div class="p-icon" style="background:#3b82f615">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="p-info">
+          <div class="p-name">Linux x86_64</div>
+          <div class="p-cmd">curl ... | bash</div>
+        </div>
+        <span class="p-badge">2.8MB</span>
+        <div class="p-copied">Copied!</div>
+      </div>
+
+      <div class="platform-card" onclick="copyCmd(this, 'curl -sSL https://apinox.denisetiya.site/install.sh | bash')">
+        <div class="p-icon" style="background:#a855f715">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="p-info">
+          <div class="p-name">Linux ARM64</div>
+          <div class="p-cmd">curl ... | bash</div>
+        </div>
+        <span class="p-badge">2.4MB</span>
+        <div class="p-copied">Copied!</div>
+      </div>
+
+      <div class="platform-card" onclick="copyCmd(this, 'curl -sSL https://apinox.denisetiya.site/install.sh | bash')">
+        <div class="p-icon" style="background:#22c55e15">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        </div>
+        <div class="p-info">
+          <div class="p-name">macOS</div>
+          <div class="p-cmd">curl ... | bash</div>
+        </div>
+        <span class="p-badge">2.6MB</span>
+        <div class="p-copied">Copied!</div>
+      </div>
+
+      <div class="platform-card" onclick="copyCmd(this, 'irm https://apinox.denisetiya.site/install.ps1 | iex')">
+        <div class="p-icon" style="background:#06b6d415">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="p-info">
+          <div class="p-name">Windows x86_64</div>
+          <div class="p-cmd">irm ... | iex</div>
+        </div>
+        <span class="p-badge">2.6MB</span>
+        <div class="p-copied">Copied!</div>
+      </div>
+
+      <div class="platform-card" onclick="copyCmd(this, 'cargo install apinox')">
+        <div class="p-icon" style="background:#f59e0b15">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        </div>
+        <div class="p-info">
+          <div class="p-name">Cargo (from source)</div>
+          <div class="p-cmd">cargo install apinox</div>
+        </div>
+        <span class="p-badge">source</span>
+        <div class="p-copied">Copied!</div>
+      </div>
+
+      <div class="platform-card" onclick="window.open('https://github.com/denisetiya/apinox/releases','_blank')">
+        <div class="p-icon" style="background:#ef444415">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div class="p-info">
+          <div class="p-name">All Releases</div>
+          <div class="p-cmd">GitHub Releases</div>
+        </div>
+        <span class="p-badge">all</span>
+        <div class="p-copied">Copied!</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ HOW IT WORKS ═══ -->
+  <section id="how">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-label">Workflow</div>
+        <h2 class="section-title">Schema-First. Zero Lock-In.</h2>
+        <p class="section-desc">Write your API shape once. Apinox generates every format you need.</p>
+      </div>
+      <div class="flow-wrap reveal">
+        <div class="flow-card primary">
+          <div class="icon" style="background:#3b82f615">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <h4>Schema YAML</h4>
+          <p>Single source of truth</p>
+        </div>
+        <div class="flow-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+        <div class="flow-card">
+          <div class="icon" style="background:#a855f715">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <h4>apinox build</h4>
+          <p>Validate + generate</p>
+        </div>
+        <div class="flow-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+        <div class="flow-card">
+          <div class="icon" style="background:#22c55e15">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h4>7 Formats</h4>
+          <p>Import anywhere</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FEATURES ═══ -->
+  <section id="features">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-label">Capabilities</div>
+        <h2 class="section-title">Everything You Need</h2>
+        <p class="section-desc">From simple REST endpoints to complex multi-auth, multi-env APIs.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card reveal">
+          <div class="icon" style="background:#3b82f612"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <h3>Custom Schema Format</h3>
+          <p>YAML or JSON. Define endpoints, params, bodies, headers, auth, environments — all in one place.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="icon" style="background:#22c55e12"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <h3>Strict Validation</h3>
+          <p>Fail-fast on duplicate IDs, type mismatches, missing fields, broken references. Zero silent errors.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="icon" style="background:#a855f712"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+          <h3>Modular Splits</h3>
+          <p>Split large APIs into multiple files. One config includes them with optional ID prefixes.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="icon" style="background:#f59e0b12"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <h3>Auth Schemes</h3>
+          <p>Bearer, API Key, Basic, OAuth2 — collection-level defaults with per-endpoint overrides.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="icon" style="background:#06b6d412"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+          <h3>Environments</h3>
+          <p>Production, staging, local — Postman variables, OpenAPI servers, all auto-generated.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="icon" style="background:#ec489912"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+          <h3>Error Templates</h3>
+          <p>DRY error responses. Define once, reuse across endpoints. 401, 404, 429, 500 — done.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="icon" style="background:#ef444412"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+          <h3>Sensitive Fields</h3>
+          <p>Mark fields as sensitive — hidden in Postman, redacted from OpenAPI docs and logs.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="icon" style="background:#06b6d412"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+          <h3>OpenAPI Import</h3>
+          <p>Already have OpenAPI/Swagger? Import it. Convert to Apinox schema, then export anywhere.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="icon" style="background:#a855f712"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <h3>Faker Fixtures</h3>
+          <p>Postman dynamic variables auto-filled. Random emails, GUIDs, names — realistic test data.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ OUTPUTS ═══ -->
+  <section id="outputs">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-label">Outputs</div>
+        <h2 class="section-title">7 Formats. One Command.</h2>
+        <p class="section-desc">Import into any tool. No vendor lock-in.</p>
+      </div>
+      <div class="output-grid">
+        <div class="output-card reveal">
+          <div class="ico" style="background:#ff6c3718"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff6c37" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
+          <h4>Postman</h4>
+          <div class="desc">Collection v2.1.0</div>
+          <div class="tag">.postman_collection.json</div>
+        </div>
+        <div class="output-card reveal">
+          <div class="ico" style="background:#22c55e18"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+          <h4>OpenAPI</h4>
+          <div class="desc">3.1.0 spec</div>
+          <div class="tag">.openapi.yaml</div>
+        </div>
+        <div class="output-card reveal">
+          <div class="ico" style="background:#3b82f618"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+          <h4>Markdown</h4>
+          <div class="desc">Docs + cURL</div>
+          <div class="tag">.md</div>
+        </div>
+        <div class="output-card reveal">
+          <div class="ico" style="background:#a855f718"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></div>
+          <h4>Scalar</h4>
+          <div class="desc">Interactive docs</div>
+          <div class="tag">.scalar.html</div>
+        </div>
+        <div class="output-card reveal">
+          <div class="ico" style="background:#f59e0b18"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+          <h4>Insomnia</h4>
+          <div class="desc">Workspace + envs</div>
+          <div class="tag">.insomnia.json</div>
+        </div>
+        <div class="output-card reveal">
+          <div class="ico" style="background:#ef444418"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+          <h4>Hurl</h4>
+          <div class="desc">HTTP tests</div>
+          <div class="tag">.hurl</div>
+        </div>
+        <div class="output-card reveal">
+          <div class="ico" style="background:#06b6d418"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+          <h4>curl</h4>
+          <div class="desc">Bash scripts</div>
+          <div class="tag">.sh</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CODE ═══ -->
+  <section id="schema">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-label">Schema Example</div>
+        <h2 class="section-title">Reads Like Documentation</h2>
+        <p class="section-desc">Clear, minimal YAML. No ceremony.</p>
+      </div>
+      <div class="code-panel reveal">
+        <div class="code-bar">
+          <span class="dot r"></span>
+          <span class="dot y"></span>
+          <span class="dot g"></span>
+          <span class="fname">api-schema.yml</span>
+        </div>
+        <div class="code-body">
+<pre><span class="key">apinox</span>: <span class="str">"1.0"</span>
+<span class="key">name</span>: my-api
+<span class="key">version</span>: <span class="num">1.0.0</span>
+<span class="key">base_url</span>: <span class="str">https://api.example.com</span>
+
+<span class="key">auth</span>:
+  <span class="key">default</span>: jwt
+  <span class="key">schemes</span>:
+    - <span class="key">id</span>: jwt
+      <span class="key">type</span>: http
+      <span class="key">scheme</span>: bearer
+      <span class="key">header</span>: Authorization
+      <span class="key">prefix</span>: <span class="str">"Bearer "</span>
+
+<span class="key">groups</span>:
+  - <span class="key">id</span>: users
+    <span class="key">name</span>: Users
+    <span class="key">description</span>: User management
+
+<span class="key">endpoints</span>:
+  - <span class="key">id</span>: list-users
+    <span class="key">name</span>: List Users
+    <span class="key">group</span>: users
+    <span class="key">method</span>: GET
+    <span class="key">path</span>: /users
+    <span class="key">query</span>:
+      - <span class="key">name</span>: page
+        <span class="key">type</span>: integer
+        <span class="key">required</span>: <span class="num">true</span>
+    <span class="key">responses</span>:
+      - <span class="key">status</span>: <span class="num">200</span>
+        <span class="key">description</span>: User list
+        <span class="key">examples</span>:
+          - <span class="key">name</span>: default
+            <span class="key">body</span>: {<span class="str">"users"</span>: [...], <span class="str">"total"</span>: <span class="num">42</span>}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CLI ═══ -->
+  <section id="cli">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-label">CLI</div>
+        <h2 class="section-title">One Binary. All Formats.</h2>
+        <p class="section-desc">Single static binary. No runtime. No dependencies.</p>
+      </div>
+      <div class="terminal reveal">
+        <div class="term-bar">
+          <span class="dot r"></span>
+          <span class="dot y"></span>
+          <span class="dot g"></span>
+          <span>~ bash</span>
+        </div>
+        <div class="term-body">
+<span class="p">$ </span><span class="c">apinox build ./api-schema.yml -o dist/</span>
+
+<span class="ok">  Validated</span> <span class="a">14 endpoints</span>, 6 groups, 2 auth schemes
+<span class="o">  0 errors, 21 warnings (missing examples)</span>
+
+<span class="ok">  Generated</span> <span class="a">7 formats</span> to dist/:
+
+<span class="o">  dist/</span>
+<span class="o">  ├── postman/     </span><span class="ok">.postman_collection.json</span><span class="o">     (20KB)</span>
+<span class="o">  ├── openapi/     </span><span class="ok">.openapi.yaml</span><span class="o">                 (23KB)</span>
+<span class="o">  ├── docs/        </span><span class="ok">.md</span><span class="o">                             (11KB)</span>
+<span class="o">  ├── docs/        </span><span class="ok">.scalar.html</span><span class="o">                   (35KB)</span>
+<span class="o">  ├── insomnia/    </span><span class="ok">.insomnia.json</span><span class="o">                (11KB)</span>
+<span class="o">  └── hurl/        </span><span class="ok">.hurl + .sh</span><span class="o">                  (9.3KB)</span>
+
+<span class="ok">  Done</span> in <span class="n">12ms</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA ═══ -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="reveal">
+        <h2>Start Defining Your API</h2>
+        <p>Install Apinox. Write a schema. Generate everything.</p>
+        <div class="hero-actions">
+          <a href="https://github.com/denisetiya/apinox" class="btn btn-primary" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            View on GitHub
+          </a>
+          <a href="#schema" class="btn btn-ghost">Read the Schema Docs</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Apinox. Built by <a href="https://denisetiya.site" target="_blank" rel="noopener">Denis Etiya</a>.</p>
+      <div class="links">
+        <a href="https://github.com/denisetiya/apinox" target="_blank" rel="noopener">GitHub</a>
+        <a href="#features">Features</a>
+        <a href="#cli">CLI</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Copy install command
+    function copyInstall() {
+      const el = document.getElementById('installCmd');
+      const cmd = el.querySelector('.cmd').textContent;
+      navigator.clipboard.writeText(cmd).then(() => {
+        const hint = el.querySelector('.copy-hint');
+        hint.textContent = 'Copied!';
+        el.classList.add('copied');
+        setTimeout(() => { hint.textContent = 'Click to copy'; el.classList.remove('copied'); }, 2000);
+      });
+    }
+
+    // Copy platform command
+    function copyCmd(card, cmd) {
+      navigator.clipboard.writeText(cmd).then(() => {
+        card.classList.add('copied');
+        setTimeout(() => card.classList.remove('copied'), 1500);
+      });
+    }
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Close mobile menu on resize
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) document.getElementById('mobileMenu').classList.remove('open');
+    });
+  </script>
+</body>
+</html>

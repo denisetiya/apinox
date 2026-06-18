@@ -1,0 +1,24 @@
+apinox: "1.0"
+name: atomix-cloud-modular
+version: 1.0.0
+description: Modular test with includes
+base_url: https://api.denisetiya.site/v1
+
+environments:
+  - name: production
+    base_url: https://api.denisetiya.site/v1
+
+auth:
+  default: bearer
+  schemes:
+    - id: bearer
+      type: http
+      scheme: bearer
+
+groups:
+  - id: products
+    name: Products
+    description: Product catalog
+
+includes:
+  - path: includes/products.api.yml

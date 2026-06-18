@@ -1,0 +1,67 @@
+{
+  "auth": {
+    "bearer": [
+      {
+        "key": "token",
+        "type": "string",
+        "value": "{{TOKEN}}"
+      }
+    ],
+    "type": "bearer"
+  },
+  "info": {
+    "_postman_id": "",
+    "description": "Modular test with includes",
+    "name": "atomix-cloud-modular",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "description": "Get all products",
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "protocol": "https",
+              "query": [
+                {
+                  "description": "",
+                  "disabled": false,
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "description": "",
+                  "disabled": false,
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ],
+              "raw": "{{base_url}}/products"
+            }
+          },
+          "response": [
+            {
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"data\": [\n    {\n      \"id\": \"prod_001\",\n      \"name\": \"Widget\",\n      \"price\": 99000\n    }\n  ],\n  \"meta\": {\n    \"page\": 1,\n    \"total\": 42\n  }\n}",
+              "code": 200,
+              "name": "200 - success",
+              "status": "OK"
+            }
+          ]
+        }
+      ],
+      "name": "Products"
+    }
+  ],
+  "variable": []
+}

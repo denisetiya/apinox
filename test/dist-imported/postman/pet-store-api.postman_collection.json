@@ -1,0 +1,92 @@
+{
+  "auth": {
+    "bearer": [
+      {
+        "key": "token",
+        "type": "string",
+        "value": "{{TOKEN}}"
+      }
+    ],
+    "type": "bearer"
+  },
+  "info": {
+    "_postman_id": "",
+    "description": "A sample pet store API",
+    "name": "Pet Store API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "item": [
+        {
+          "name": "List all pets",
+          "request": {
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pets"
+              ],
+              "protocol": "https",
+              "query": [
+                {
+                  "description": "",
+                  "key": "limit",
+                  "value": ""
+                }
+              ],
+              "raw": "{{base_url}}/pets"
+            }
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "200 A list of pets",
+              "originalRequest": {},
+              "status": "OK"
+            }
+          ]
+        },
+        {
+          "name": "Create a pet",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"breed\": \"{$randomWord}\",\n  \"name\": \"{{$randomFullName}}\"\n}"
+            },
+            "header": [],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pets"
+              ],
+              "protocol": "https",
+              "raw": "{{base_url}}/pets"
+            }
+          },
+          "response": [
+            {
+              "code": 201,
+              "name": "201 Pet created",
+              "originalRequest": {},
+              "status": "Created"
+            }
+          ]
+        }
+      ],
+      "name": "pets"
+    }
+  ],
+  "variable": []
+}

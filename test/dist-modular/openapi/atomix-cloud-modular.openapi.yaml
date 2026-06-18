@@ -1,0 +1,52 @@
+openapi: 3.1.0
+info:
+  title: atomix-cloud-modular
+  version: 1.0.0
+  description: Modular test with includes
+servers:
+- url: https://api.denisetiya.site/v1
+  description: production
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+paths:
+  /products:
+    get:
+      operationId: list-products
+      summary: List Products
+      description: Get all products
+      tags:
+      - Products
+      parameters:
+      - name: page
+        in: query
+        required: true
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Product list
+          examples:
+            success:
+              summary: success
+              value: |-
+                {
+                  "data": [
+                    {
+                      "id": "prod_001",
+                      "name": "Widget",
+                      "price": 99000
+                    }
+                  ],
+                  "meta": {
+                    "page": 1,
+                    "total": 42
+                  }
+                }

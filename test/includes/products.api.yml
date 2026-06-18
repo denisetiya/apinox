@@ -1,0 +1,27 @@
+endpoints:
+  - id: list-products
+    name: List Products
+    group: products
+    method: GET
+    path: /products
+    description: Get all products
+    query_params:
+      - name: page
+        type: integer
+        default: 1
+      - name: per_page
+        type: integer
+        default: 20
+    responses:
+      - status: 200
+        description: Product list
+        examples:
+          - name: success
+            value:
+              data:
+                - id: prod_001
+                  name: Widget
+                  price: 99000
+              meta:
+                page: 1
+                total: 42

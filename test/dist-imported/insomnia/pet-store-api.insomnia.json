@@ -1,0 +1,77 @@
+{
+  "__export_date": "2026-06-17T07:40:08.168737090+00:00",
+  "__export_format": 4,
+  "__export_source": "apinox",
+  "resources": [
+    {
+      "_id": "apinox_ws_pet_store_api",
+      "_type": "workspace",
+      "description": "A sample pet store API",
+      "name": "Pet Store API",
+      "scope": "collection"
+    },
+    {
+      "_id": "apinox_ws_pet_store_api_cookie_jar",
+      "_type": "cookie_jar",
+      "cookies": [],
+      "parentId": "apinox_ws_pet_store_api"
+    },
+    {
+      "_id": "apinox_ws_pet_store_api_env_base",
+      "_type": "environment",
+      "data": {
+        "base_url": "https://petstore.example.com/v1"
+      },
+      "name": "Base Environment",
+      "parentId": "apinox_ws_pet_store_api"
+    },
+    {
+      "_id": "apinox_folder_pets",
+      "_type": "request_group",
+      "description": "Pet operations",
+      "name": "pets",
+      "parentId": "apinox_ws_pet_store_api"
+    },
+    {
+      "_id": "apinox_req_get-pets",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "headers": [],
+      "method": "GET",
+      "name": "List all pets",
+      "parameters": [
+        {
+          "description": "",
+          "disabled": false,
+          "name": "limit",
+          "value": ""
+        }
+      ],
+      "parentId": "apinox_folder_pets",
+      "url": "https://petstore.example.com/v1/pets"
+    },
+    {
+      "_id": "apinox_req_post-pets",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{}"
+      },
+      "headers": [],
+      "method": "POST",
+      "name": "Create a pet",
+      "parameters": [],
+      "parentId": "apinox_folder_pets",
+      "url": "https://petstore.example.com/v1/pets"
+    }
+  ]
+}

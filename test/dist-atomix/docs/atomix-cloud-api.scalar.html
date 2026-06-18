@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>atomix-cloud-api — API Reference</title>
+  <style>
+    /* Dark theme base */
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    html {
+      background: #0d1117;
+    }
+    /* Scalar overrides for dark mode */
+    .scalar-api-reference {
+      --scalar-color-1: #e6edf3;
+      --scalar-color-2: #8b949e;
+      --scalar-color-3: #58a6ff;
+      --scalar-sidebar-background: #161b22;
+      --scalar-sidebar-border-color: #30363d;
+      --scalar-customer-theme: dark;
+    }
+  </style>
+</head>
+<body>
+  <div id="scalar-api-reference"></div>
+
+  <script id="api-reference" type="application/json">
+{
+  "components": {
+    "securitySchemes": {
+      "jwt": {
+        "description": "JWT token from GitHub OAuth login",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Atomix Cloud — self-hosted PaaS platform API (GitHub OAuth, projects, deployments, databases, domains)",
+    "title": "atomix-cloud-api",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/auth/github": {
+      "get": {
+        "description": "Redirect to GitHub OAuth consent screen. Returns 302 to github.com/login/oauth/authorize.",
+        "operationId": "auth-login",
+        "responses": {
+          "302": {
+            "description": "Redirect to GitHub"
+          }
+        },
+        "summary": "Initiate GitHub OAuth",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/github/callback": {
+      "get": {
+        "description": "GitHub redirects here with ?code=xxx. Exchanges code for token, creates/updates user, returns JWT.",
+        "operationId": "auth-callback",
+        "parameters": [
+          {
+            "description": "OAuth authorization code from GitHub",
+            "in": "query",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "CSRF state parameter",
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "token": {
+                      "description": "JWT Bearer token",
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Login successful",
+            "examples": {
+              "success": {
+                "summary": "success",
+                "value": {
+                  "token": "eyJhbG...NiIs...",
+                  "user": {
+                    "avatar_url": "https://avatars.githubusercontent.com/u/12345",
+                    "created_at": "2026-01-15T08:30:00Z",
+                    "email": "deni@example.com",
+                    "id": "550e8400-e29b-41d4-a716-446655440000",
+                    "username": "denisetiya"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Authentication required"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal server error"
+          }
+        },
+        "summary": "GitHub OAuth Callback",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/github/repos": {
+      "get": {
+        "description": "List authenticated user's GitHub repositories (via GitHub API with user's token).",
+        "operationId": "github-list-repos",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "clone_url": {
+                      "type": "string"
+                    },
+                    "default_branch": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "full_name": {
+                      "type": "string"
+                    },
+                    "language": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "private": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "List of repos",
+            "examples": {
+              "sample": {
+                "summary": "sample",
+                "value": [
+                  {
+                    "clone_url": "https://github.com/denisetiya/atomix-cloud.git",
+                    "default_branch": "main",
+                    "description": "Self-hosted PaaS",
+                    "full_name": "denisetiya/atomix-cloud",
+                    "language": "Rust",
+                    "name": "atomix-cloud",
+                    "private": false
+                  },
+                  {
+                    "clone_url": "https://github.com/denisetiya/my-astro-blog.git",
+                    "default_branch": "main",
+                    "description": null,
+                    "full_name": "denisetiya/my-astro-blog",
+                    "language": "TypeScript",
+                    "name": "my-astro-blog",
+                    "private": false
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Authentication required"
+          }
+        },
+        "summary": "List User GitHub Repos",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "description": "Invalidate current JWT session.",
+        "operationId": "auth-logout",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Logged out"
+          }
+        },
+        "summary": "Logout",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "description": "Get authenticated user profile from JWT token.",
+        "operationId": "auth-me",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "avatar_url": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "github_id": {
+                      "type": "integer"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "User profile",
+            "examples": {
+              "success": {
+                "summary": "success",
+                "value": {
+                  "avatar_url": "https://avatars.githubusercontent.com/u/12345",
+                  "created_at": "2026-01-15T08:30:00Z",
+                  "email": "deni@example.com",
+                  "github_id": 12345678,
+                  "id": "550e8400-e29b-41d4-a716-446655440000",
+                  "username": "denisetiya"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Authentication required"
+          }
+        },
+        "summary": "Get Current User",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/deployments/{id}": {
+      "get": {
+        "description": "Get single deployment details.",
+        "operationId": "get-deployment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "branch": {
+                      "type": "string"
+                    },
+                    "build_logs": {
+                      "type": "string"
+                    },
+                    "commit_message": {
+                      "type": "string"
+                    },
+                    "commit_sha": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "deploy_logs": {
+                      "type": "string"
+                    },
+                    "finished_at": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": [
+                        "building",
+                        "deploying",
+                        "running",
+                        "failed",
+                        "rolled_back"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Deployment details"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Resource not found"
+          }
+        },
+        "summary": "Get Deployment",
+        "tags": [
+          "Deployments"
+        ]
+      }
+    },
+    "/deployments/{id}/logs": {
+      "get": {
+        "description": "Get build and deploy logs for a deployment.",
+        "operationId": "get-deployment-logs",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "build_logs": {
+                      "description": "Full build log output",
+                      "type": "string"
+                    },
+                    "deploy_logs": {
+                      "description": "Full deploy log output",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Logs",
+            "examples": {
+              "success": {
+                "summary": "success",
+                "value": {
+                  "build_logs": "[build] Pulling latest commits...\n[build] Detected framework: axum (Rust)\n[build] cargo build --release\n[build]    Compiling atomix-cloud v0.1.0\n[build]     Finished release [optimized] in 42.3s\n[build] Build complete (43.1s)\n",
+                  "deploy_logs": ""
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get Deployment Logs",
+        "tags": [
+          "Deployments"
+        ]
+      }
+    },
+    "/projects": {
+      "get": {
+        "description": "List all projects for authenticated user.",
+        "operationId": "list-projects",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "per_page": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Paginated project list",
+            "examples": {
+              "default": {
+                "summary": "default",
+                "value": {
+                  "page": 1,
+                  "per_page": 20,
+                  "projects": [
+                    {
+                      "created_at": "2026-03-01T10:00:00Z",
+                      "framework": "axum",
+                      "id": "proj_a1b2c3",
+                      "language": "rust",
+                      "name": "atomix-cloud",
+                      "port": 8080,
+                      "repo_branch": "main",
+                      "repo_url": "https://github.com/denisetiya/atomix-cloud.git",
+                      "status": "running",
+                      "updated_at": "2026-06-15T14:30:00Z"
+                    }
+                  ],
+                  "total": 1
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Authentication required"
+          }
+        },
+        "summary": "List Projects",
+        "tags": [
+          "Projects"
+        ]
+      },
+      "post": {
+        "description": "Create a new project from a GitHub repository. Clones repo, detects framework, triggers first deploy.",
+        "operationId": "create-project",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "name": "atomix-cloud",
+                "repo_branch": "main",
+                "repo_url": "https://github.com/denisetiya/atomix-cloud.git"
+              },
+              "schema": {
+                "properties": {
+                  "build_command": {
+                    "description": "Custom build command",
+                    "type": "string"
+                  },
+                  "framework": {
+                    "description": "Override auto-detected framework (axum, astro, nextjs, express, flask, etc)",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Project display name",
+                    "type": "string"
+                  },
+                  "port": {
+                    "description": "Container internal port (auto-detected if omitted)",
+                    "type": "integer"
+                  },
+                  "repo_branch": {
+                    "description": "Branch to deploy",
+                    "type": "string"
+                  },
+                  "repo_url": {
+                    "description": "Git clone URL",
+                    "type": "string"
+                  },
+                  "start_command": {
+                    "description": "Custom start command",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "repo_url"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "framework": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "language": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "port": {
+                      "type": "integer"
+                    },
+                    "repo_branch": {
+                      "type": "string"
+                    },
+                    "repo_url": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "building",
+                        "deploying",
+                        "running",
+                        "failed",
+                        "rolled_back"
+                      ],
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Project created",
+            "examples": {
+              "created": {
+                "summary": "created",
+                "value": {
+                  "created_at": "2026-06-17T12:00:00Z",
+                  "framework": "axum",
+                  "id": "proj_x9y8z7",
+                  "language": "rust",
+                  "name": "atomix-cloud",
+                  "port": 8080,
+                  "repo_branch": "main",
+                  "repo_url": "https://github.com/denisetiya/atomix-cloud.git",
+                  "status": "pending",
+                  "updated_at": "2026-06-17T12:00:00Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Authentication required"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Project with same name already exists"
+          }
+        },
+        "summary": "Create Project",
+        "tags": [
+          "Projects"
+        ]
+      }
+    },
+    "/projects/{id}": {
+      "delete": {
+        "description": "Delete project and all associated resources (containers, env vars, domains, databases).",
+        "operationId": "delete-project",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Deleted"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Resource not found"
+          }
+        },
+        "summary": "Delete Project",
+        "tags": [
+          "Projects"
+        ]
+      },
+      "get": {
+        "description": "Get project details by ID.",
+        "operationId": "get-project",
+        "parameters": [
+          {
+            "description": "Project ID (e.g. proj_a1b2c3)",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "framework": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "language": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "port": {
+                      "type": "integer"
+                    },
+                    "repo_branch": {
+                      "type": "string"
+                    },
+                    "repo_url": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "building",
+                        "deploying",
+                        "running",
+                        "failed",
+                        "rolled_back"
+                      ],
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Project details"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Resource not found"
+          }
+        },
+        "summary": "Get Project",
+        "tags": [
+          "Projects"
+        ]
+      },
+      "put": {
+        "description": "Update project settings. Triggers new deployment if build/start commands changed.",
+        "operationId": "update-project",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "build_command": {
+                    "type": "string"
+                  },
+                  "framework": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "integer"
+                  },
+                  "repo_branch": {
+                    "type": "string"
+                  },
+                  "start_command": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "framework": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "language": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "port": {
+                      "type": "integer"
+                    },
+                    "repo_branch": {
+                      "type": "string"
+                    },
+                    "repo_url": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "building",
+                        "deploying",
+                        "running",
+                        "failed",
+                        "rolled_back"
+                      ],
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Updated project"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Resource not found"
+          }
+        },
+        "summary": "Update Project",
+        "tags": [
+          "Projects"
+        ]
+      }
+    },
+    "/projects/{id}/deploy": {
+      "post": {
+        "description": "Trigger a new deployment. Pulls latest code, builds, and deploys.",
+        "operationId": "trigger-deploy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "branch": {
+                      "type": "string"
+                    },
+                    "build_logs": {
+                      "type": "string"
+                    },
+                    "commit_message": {
+                      "type": "string"
+                    },
+                    "commit_sha": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "deploy_logs": {
+                      "type": "string"
+                    },
+                    "finished_at": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": [
+                        "building",
+                        "deploying",
+                        "running",
+                        "failed",
+                        "rolled_back"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Deployment triggered",
+            "examples": {
+              "triggered": {
+                "summary": "triggered",
+                "value": {
+                  "branch": "main",
+                  "build_logs": "",
+                  "commit_message": "feat: add database provisioning",
+                  "commit_sha": "abc1234",
+                  "created_at": "2026-06-17T12:05:00Z",
+                  "deploy_logs": "",
+                  "finished_at": null,
+                  "id": "dpl_m1n2o3",
+                  "project_id": "proj_a1b2c3",
+                  "status": "building"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "retry_after": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Trigger Deployment",
+        "tags": [
+          "Deployments"
+        ]
+      }
+    },
+    "/projects/{id}/deployments": {
+      "get": {
+        "description": "List all deployments for a project, newest first.",
+        "operationId": "list-deployments",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Deployment list"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Resource not found"
+          }
+        },
+        "summary": "List Deployments",
+        "tags": [
+          "Deployments"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "description": "Production server",
+      "url": "https://cloud.denisetiya.site/api"
+    },
+    {
+      "description": "Local development",
+      "url": "http://localhost:8080"
+    }
+  ]
+}
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+apinox: "1.0"
+name: atomix-cloud-api
+version: 2.4.0
+description: Atomix Cloud platform API
+base_url: https://api.denisetiya.site/v1
+
+environments:
+  - name: production
+    base_url: https://api.denisetiya.site/v1
+    vars:
+      TOKEN: prod_xxx_secret
+  - name: development
+    base_url: http://localhost:8520/v1
+    vars:
+      TOKEN: dev_token_local
+
+auth:
+  default: bearer
+  schemes:
+    - id: bearer
+      type: http
+      scheme: bearer
+      header: Authorization
+      prefix: "Bearer "
+      description: JWT Bearer token authentication
+    - id: api_key
+      type: apiKey
+      key: X-API-Key
+      in_location: header
+      description: API key authentication
+
+groups:
+  - id: auth
+    name: Authentication
+    description: Login, register, and session management
+  - id: users
+    name: Users
+    description: User profile management
+  - id: payments
+    name: Payments
+    description: Payment gateway integration
+
+endpoints:
+  - id: login
+    name: User Login
+    group: auth
+    method: POST
+    path: /auth/login
+    description: |
+      Login dengan email/password. Returns JWT token
+      yang expire dalam 7 hari.
+    headers:
+      - name: Content-Type
+        value: application/json
+        required: true
+    body:
+      type: json
+      required: true
+      schema:
+        email:
+          type: email
+          required: true
+          description: User email address
+        password:
+          type: string
+          required: true
+          sensitive: true
+          min_length: 8
+          max_length: 128
+          description: User password
+      examples:
+        - name: valid_user
+          description: Successful login
+          value:
+            email: user@example.com
+            password: SuperSecret123!
+    responses:
+      - status: 200
+        description: Login berhasil
+        examples:
+          - name: success
+            value:
+              token: eyJhbG...NiJ9
+              expires_in: 604800
+              user:
+                id: usr_123
+                email: user@example.com
+                role: admin
+      - status: 401
+        description: Credentials salah
+        examples:
+          - name: invalid_credentials
+            value:
+              error: invalid_credentials
+              message: Email atau password tidak cocok
+
+  - id: upload-avatar
+    name: Upload User Avatar
+    group: users
+    method: POST
+    path: /users/{user_id}/avatar
+    description: Upload avatar image (multipart/form-data)
+    path_params:
+      - name: user_id
+        type: string
+        required: true
+        pattern: "^usr_[a-zA-Z0-9]+$"
+        description: User ID
+    auth: bearer
+    body:
+      type: formdata
+      fields:
+        - name: avatar
+          type: file
+          required: true
+          accept:
+            - image/jpeg
+            - image/png
+            - image/webp
+          max_size_mb: 5
+          description: Avatar image file
+        - name: crop
+          type: string
+          default: square
+          enum:
+            - square
+            - circle
+            - original
+          description: Crop mode
+      examples:
+        - name: default_upload
+          value:
+            crop: square
+    responses:
+      - status: 200
+        description: Avatar terupload
+        examples:
+          - name: success
+            value:
+              url: https://cdn.denisetiya.site/avatars/usr_123.webp
+              variants:
+                - size: 64
+                  url: https://cdn.denisetiya.site/avatars/usr_123_64.webp
+                - size: 256
+                  url: https://cdn.denisetiya.site/avatars/usr_123_256.webp
+      - status: 413
+        description: File terlalu besar
+        examples:
+          - name: file_too_large
+            value:
+              error: file_too_large
+              max_mb: 5
+
+  - id: create-payment
+    name: Create Midtrans Payment
+    group: payments
+    method: POST
+    path: /payments/midtrans
+    description: |
+      Generate Snap token untuk QRIS payment.
+      Webhook akan dikirim ke configured URL.
+    auth: bearer
+    body:
+      type: json
+      required: true
+      schema:
+        order_id:
+          type: string
+          required: true
+          description: Order ID
+        amount:
+          type: integer
+          required: true
+          min: 100
+          description: Payment amount in IDR
+        method:
+          type: string
+          default: qris
+          enum:
+            - qris
+            - va
+            - gopay
+          description: Payment method
+      examples:
+        - name: qris_payment
+          value:
+            order_id: ord_001
+            amount: 150000
+            method: qris
+    headers:
+      - name: Idempotency-Key
+        required: false
+        description: Unique key to prevent double-charge
+    responses:
+      - status: 200
+        description: Payment created
+        examples:
+          - name: success
+            value:
+              snap_token: 59e3be85-1234-5678-abcd-ef0123456789
+              redirect_url: https://app.midtrans.com/snap/v2/vtweb/59e3be85
+              expires_at: "2026-06-18T12:00:00Z"
+      - status: 402
+        description: Payment gateway error
+        examples:
+          - name: gateway_unavailable
+            value:
+              error: gateway_unavailable
+              retry_after: 30

@@ -1,0 +1,137 @@
+apinox: '1.0'
+name: Pet Store API
+version: 1.0.0
+description: A sample pet store API
+base_url: https://petstore.example.com/v1
+environments:
+- name: Production
+  base_url: https://petstore.example.com/v1
+  description: Production
+  vars: {}
+auth:
+  default: bearerAuth
+  schemes:
+  - id: bearerAuth
+    type: http
+    scheme: bearer
+    header: Authorization
+    prefix: 'Bearer '
+    key: null
+    in_location: null
+    description: null
+groups:
+- id: pets
+  name: pets
+  description: Pet operations
+  auth: null
+endpoints:
+- id: get-pets
+  name: List all pets
+  group: pets
+  method: GET
+  path: /pets
+  description: null
+  deprecated: false
+  tags:
+  - pets
+  auth: null
+  auth_override: null
+  servers: null
+  rate_limit: null
+  path_params: []
+  query_params:
+  - name: limit
+    type: integer
+    required: false
+    description: null
+    deprecated: false
+    example: null
+    min: null
+    max: null
+    min_length: null
+    max_length: null
+    pattern: null
+    enum: null
+    format: null
+    default: null
+    items: null
+    max_items: null
+    min_items: null
+    fields: null
+  headers: []
+  body: null
+  responses:
+  - status: 200
+    description: A list of pets
+    headers: []
+    content_type: application/json
+    schema: {}
+    examples: []
+    use_pattern: null
+- id: post-pets
+  name: Create a pet
+  group: pets
+  method: POST
+  path: /pets
+  description: null
+  deprecated: false
+  tags:
+  - pets
+  auth: null
+  auth_override: null
+  servers: null
+  rate_limit: null
+  path_params: []
+  query_params: []
+  headers: []
+  body:
+    type: json
+    required: true
+    content_type: application/json
+    description: null
+    schema:
+      name:
+        type: string
+        required: true
+        sensitive: false
+        description: null
+        default: null
+        enum: null
+        min: null
+        max: null
+        min_length: null
+        max_length: null
+        pattern: null
+        format: null
+        sub_fields: null
+        sub_items: null
+      breed:
+        type: string
+        required: false
+        sensitive: false
+        description: null
+        default: null
+        enum: null
+        min: null
+        max: null
+        min_length: null
+        max_length: null
+        pattern: null
+        format: null
+        sub_fields: null
+        sub_items: null
+    fields: null
+    examples: []
+    encoding: null
+    mime_type: application/json
+  responses:
+  - status: 201
+    description: Pet created
+    headers: []
+    content_type: null
+    schema: null
+    examples: []
+    use_pattern: null
+includes: []
+changelog: []
+error_responses: null

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>atomix-cloud-modular — API Reference</title>
+  <style>
+    /* Dark theme base */
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    html {
+      background: #0d1117;
+    }
+    /* Scalar overrides for dark mode */
+    .scalar-api-reference {
+      --scalar-color-1: #e6edf3;
+      --scalar-color-2: #8b949e;
+      --scalar-color-3: #58a6ff;
+      --scalar-sidebar-background: #161b22;
+      --scalar-sidebar-border-color: #30363d;
+      --scalar-customer-theme: dark;
+    }
+  </style>
+</head>
+<body>
+  <div id="scalar-api-reference"></div>
+
+  <script id="api-reference" type="application/json">
+{
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Modular test with includes",
+    "title": "atomix-cloud-modular",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/products": {
+      "get": {
+        "description": "Get all products",
+        "operationId": "list-products",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product list",
+            "examples": {
+              "success": {
+                "summary": "success",
+                "value": {
+                  "data": [
+                    {
+                      "id": "prod_001",
+                      "name": "Widget",
+                      "price": 99000
+                    }
+                  ],
+                  "meta": {
+                    "page": 1,
+                    "total": 42
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List Products",
+        "tags": [
+          "Products"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "description": "production",
+      "url": "https://api.denisetiya.site/v1"
+    }
+  ]
+}
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+</body>
+</html>

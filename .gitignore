@@ -1,0 +1,7 @@
+/target
+/releases
+*.o
+*.pyc
+__pycache__/
+.env
+.apinox.toml

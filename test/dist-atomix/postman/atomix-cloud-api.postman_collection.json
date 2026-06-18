@@ -1,0 +1,643 @@
+{
+  "auth": {
+    "bearer": [
+      {
+        "key": "token",
+        "type": "string",
+        "value": "{{TOKEN}}"
+      }
+    ],
+    "type": "bearer"
+  },
+  "info": {
+    "_postman_id": "",
+    "description": "Atomix Cloud — self-hosted PaaS platform API (GitHub OAuth, projects, deployments, databases, domains)",
+    "name": "atomix-cloud-api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "item": [
+        {
+          "name": "Trigger Deployment",
+          "request": {
+            "description": "Trigger a new deployment. Pulls latest code, builds, and deploys.",
+            "header": [],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects",
+                "{id}",
+                "deploy"
+              ],
+              "protocol": "https",
+              "raw": "{{base_url}}/projects/{id}/deploy",
+              "variable": [
+                {
+                  "description": "",
+                  "key": "id",
+                  "value": ":id"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"branch\": \"main\",\n  \"build_logs\": \"\",\n  \"commit_message\": \"feat: add database provisioning\",\n  \"commit_sha\": \"abc1234\",\n  \"created_at\": \"2026-06-17T12:05:00Z\",\n  \"deploy_logs\": \"\",\n  \"finished_at\": null,\n  \"id\": \"dpl_m1n2o3\",\n  \"project_id\": \"proj_a1b2c3\",\n  \"status\": \"building\"\n}",
+              "code": 201,
+              "name": "201 - Deployment triggered",
+              "originalRequest": {},
+              "status": "Created"
+            },
+            {
+              "code": 404,
+              "name": "404 Resource not found",
+              "originalRequest": {},
+              "status": "Not Found"
+            },
+            {
+              "code": 429,
+              "name": "429 Rate limit exceeded",
+              "originalRequest": {},
+              "status": "Too Many Requests"
+            }
+          ]
+        },
+        {
+          "name": "List Deployments",
+          "request": {
+            "description": "List all deployments for a project, newest first.",
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects",
+                "{id}",
+                "deployments"
+              ],
+              "protocol": "https",
+              "query": [
+                {
+                  "description": "",
+                  "disabled": false,
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "description": "",
+                  "disabled": false,
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ],
+              "raw": "{{base_url}}/projects/{id}/deployments",
+              "variable": [
+                {
+                  "description": "",
+                  "key": "id",
+                  "value": ":id"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "200 Deployment list",
+              "originalRequest": {},
+              "status": "OK"
+            },
+            {
+              "code": 404,
+              "name": "404 Resource not found",
+              "originalRequest": {},
+              "status": "Not Found"
+            }
+          ]
+        },
+        {
+          "name": "Get Deployment",
+          "request": {
+            "description": "Get single deployment details.",
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "deployments",
+                "{id}"
+              ],
+              "protocol": "https",
+              "raw": "{{base_url}}/deployments/{id}",
+              "variable": [
+                {
+                  "description": "",
+                  "key": "id",
+                  "value": ":id"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "200 Deployment details",
+              "originalRequest": {},
+              "status": "OK"
+            },
+            {
+              "code": 404,
+              "name": "404 Resource not found",
+              "originalRequest": {},
+              "status": "Not Found"
+            }
+          ]
+        },
+        {
+          "name": "Get Deployment Logs",
+          "request": {
+            "description": "Get build and deploy logs for a deployment.",
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "deployments",
+                "{id}",
+                "logs"
+              ],
+              "protocol": "https",
+              "raw": "{{base_url}}/deployments/{id}/logs",
+              "variable": [
+                {
+                  "description": "",
+                  "key": "id",
+                  "value": ":id"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"build_logs\": \"[build] Pulling latest commits...\\n[build] Detected framework: axum (Rust)\\n[build] cargo build --release\\n[build]    Compiling atomix-cloud v0.1.0\\n[build]     Finished release [optimized] in 42.3s\\n[build] Build complete (43.1s)\\n\",\n  \"deploy_logs\": \"\"\n}",
+              "code": 200,
+              "name": "200 - Logs",
+              "originalRequest": {},
+              "status": "OK"
+            }
+          ]
+        }
+      ],
+      "name": "Deployments"
+    },
+    {
+      "item": [
+        {
+          "name": "Initiate GitHub OAuth",
+          "request": {
+            "description": "Redirect to GitHub OAuth consent screen. Returns 302 to github.com/login/oauth/authorize.",
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "github"
+              ],
+              "protocol": "https",
+              "raw": "{{base_url}}/auth/github"
+            }
+          },
+          "response": [
+            {
+              "code": 302,
+              "name": "302 Redirect to GitHub",
+              "originalRequest": {},
+              "status": "Found"
+            }
+          ]
+        },
+        {
+          "name": "GitHub OAuth Callback",
+          "request": {
+            "description": "GitHub redirects here with ?code=xxx. Exchanges code for token, creates/updates user, returns JWT.",
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "github",
+                "callback"
+              ],
+              "protocol": "https",
+              "query": [
+                {
+                  "description": "OAuth authorization code from GitHub",
+                  "disabled": false,
+                  "key": "code",
+                  "value": ""
+                },
+                {
+                  "description": "CSRF state parameter",
+                  "key": "state",
+                  "value": ""
+                }
+              ],
+              "raw": "{{base_url}}/auth/github/callback"
+            }
+          },
+          "response": [
+            {
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"token\": \"eyJhbG...NiIs...\",\n  \"user\": {\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/12345\",\n    \"created_at\": \"2026-01-15T08:30:00Z\",\n    \"email\": \"deni@example.com\",\n    \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"username\": \"denisetiya\"\n  }\n}",
+              "code": 200,
+              "name": "200 - Login successful",
+              "originalRequest": {},
+              "status": "OK"
+            },
+            {
+              "code": 401,
+              "name": "401 Authentication required",
+              "originalRequest": {},
+              "status": "Unauthorized"
+            },
+            {
+              "code": 500,
+              "name": "500 Internal server error",
+              "originalRequest": {},
+              "status": "Internal Server Error"
+            }
+          ]
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "description": "Get authenticated user profile from JWT token.",
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ],
+              "protocol": "https",
+              "raw": "{{base_url}}/auth/me"
+            }
+          },
+          "response": [
+            {
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"avatar_url\": \"https://avatars.githubusercontent.com/u/12345\",\n  \"created_at\": \"2026-01-15T08:30:00Z\",\n  \"email\": \"deni@example.com\",\n  \"github_id\": 12345678,\n  \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"username\": \"denisetiya\"\n}",
+              "code": 200,
+              "name": "200 - User profile",
+              "originalRequest": {},
+              "status": "OK"
+            },
+            {
+              "code": 401,
+              "name": "401 Authentication required",
+              "originalRequest": {},
+              "status": "Unauthorized"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "description": "Invalidate current JWT session.",
+            "header": [],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ],
+              "protocol": "https",
+              "raw": "{{base_url}}/auth/logout"
+            }
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "200 Logged out",
+              "originalRequest": {},
+              "status": "OK"
+            }
+          ]
+        },
+        {
+          "name": "List User GitHub Repos",
+          "request": {
+            "description": "List authenticated user's GitHub repositories (via GitHub API with user's token).",
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "github",
+                "repos"
+              ],
+              "protocol": "https",
+              "query": [
+                {
+                  "description": "",
+                  "disabled": false,
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "description": "",
+                  "disabled": false,
+                  "key": "per_page",
+                  "value": "30"
+                },
+                {
+                  "description": "",
+                  "disabled": false,
+                  "key": "sort",
+                  "value": "\"updated\""
+                }
+              ],
+              "raw": "{{base_url}}/auth/github/repos"
+            }
+          },
+          "response": [
+            {
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"clone_url\": \"https://github.com/denisetiya/atomix-cloud.git\",\n    \"default_branch\": \"main\",\n    \"description\": \"Self-hosted PaaS\",\n    \"full_name\": \"denisetiya/atomix-cloud\",\n    \"language\": \"Rust\",\n    \"name\": \"atomix-cloud\",\n    \"private\": false\n  },\n  {\n    \"clone_url\": \"https://github.com/denisetiya/my-astro-blog.git\",\n    \"default_branch\": \"main\",\n    \"description\": null,\n    \"full_name\": \"denisetiya/my-astro-blog\",\n    \"language\": \"TypeScript\",\n    \"name\": \"my-astro-blog\",\n    \"private\": false\n  }\n]",
+              "code": 200,
+              "name": "200 - List of repos",
+              "originalRequest": {},
+              "status": "OK"
+            },
+            {
+              "code": 401,
+              "name": "401 Authentication required",
+              "originalRequest": {},
+              "status": "Unauthorized"
+            }
+          ]
+        }
+      ],
+      "name": "Authentication"
+    },
+    {
+      "item": [
+        {
+          "name": "List Projects",
+          "request": {
+            "description": "List all projects for authenticated user.",
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects"
+              ],
+              "protocol": "https",
+              "query": [
+                {
+                  "description": "",
+                  "disabled": false,
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "description": "",
+                  "disabled": false,
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ],
+              "raw": "{{base_url}}/projects"
+            }
+          },
+          "response": [
+            {
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"page\": 1,\n  \"per_page\": 20,\n  \"projects\": [\n    {\n      \"created_at\": \"2026-03-01T10:00:00Z\",\n      \"framework\": \"axum\",\n      \"id\": \"proj_a1b2c3\",\n      \"language\": \"rust\",\n      \"name\": \"atomix-cloud\",\n      \"port\": 8080,\n      \"repo_branch\": \"main\",\n      \"repo_url\": \"https://github.com/denisetiya/atomix-cloud.git\",\n      \"status\": \"running\",\n      \"updated_at\": \"2026-06-15T14:30:00Z\"\n    }\n  ],\n  \"total\": 1\n}",
+              "code": 200,
+              "name": "200 - Paginated project list",
+              "originalRequest": {},
+              "status": "OK"
+            },
+            {
+              "code": 401,
+              "name": "401 Authentication required",
+              "originalRequest": {},
+              "status": "Unauthorized"
+            }
+          ]
+        },
+        {
+          "name": "Create Project",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"name\": \"atomix-cloud\",\n  \"repo_branch\": \"main\",\n  \"repo_url\": \"https://github.com/denisetiya/atomix-cloud.git\"\n}"
+            },
+            "description": "Create a new project from a GitHub repository. Clones repo, detects framework, triggers first deploy.",
+            "header": [],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects"
+              ],
+              "protocol": "https",
+              "raw": "{{base_url}}/projects"
+            }
+          },
+          "response": [
+            {
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"created_at\": \"2026-06-17T12:00:00Z\",\n  \"framework\": \"axum\",\n  \"id\": \"proj_x9y8z7\",\n  \"language\": \"rust\",\n  \"name\": \"atomix-cloud\",\n  \"port\": 8080,\n  \"repo_branch\": \"main\",\n  \"repo_url\": \"https://github.com/denisetiya/atomix-cloud.git\",\n  \"status\": \"pending\",\n  \"updated_at\": \"2026-06-17T12:00:00Z\"\n}",
+              "code": 201,
+              "name": "201 - Project created",
+              "originalRequest": {},
+              "status": "Created"
+            },
+            {
+              "code": 401,
+              "name": "401 Authentication required",
+              "originalRequest": {},
+              "status": "Unauthorized"
+            },
+            {
+              "code": 409,
+              "name": "409 Project with same name already exists",
+              "originalRequest": {},
+              "status": "Conflict"
+            }
+          ]
+        },
+        {
+          "name": "Get Project",
+          "request": {
+            "description": "Get project details by ID.",
+            "header": [],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects",
+                "{id}"
+              ],
+              "protocol": "https",
+              "raw": "{{base_url}}/projects/{id}",
+              "variable": [
+                {
+                  "description": "Project ID (e.g. proj_a1b2c3)",
+                  "key": "id",
+                  "value": ":id"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "200 Project details",
+              "originalRequest": {},
+              "status": "OK"
+            },
+            {
+              "code": 404,
+              "name": "404 Resource not found",
+              "originalRequest": {},
+              "status": "Not Found"
+            }
+          ]
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"build_command\": \"{$randomWord}\",\n  \"framework\": \"{$randomWord}\",\n  \"name\": \"{{$randomFullName}}\",\n  \"port\": \"{{$randomInt}}\",\n  \"repo_branch\": \"{$randomWord}\",\n  \"start_command\": \"{$randomWord}\"\n}"
+            },
+            "description": "Update project settings. Triggers new deployment if build/start commands changed.",
+            "header": [],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects",
+                "{id}"
+              ],
+              "protocol": "https",
+              "raw": "{{base_url}}/projects/{id}",
+              "variable": [
+                {
+                  "description": "",
+                  "key": "id",
+                  "value": ":id"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "200 Updated project",
+              "originalRequest": {},
+              "status": "OK"
+            },
+            {
+              "code": 404,
+              "name": "404 Resource not found",
+              "originalRequest": {},
+              "status": "Not Found"
+            }
+          ]
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "description": "Delete project and all associated resources (containers, env vars, domains, databases).",
+            "header": [],
+            "method": "DELETE",
+            "url": {
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects",
+                "{id}"
+              ],
+              "protocol": "https",
+              "raw": "{{base_url}}/projects/{id}",
+              "variable": [
+                {
+                  "description": "",
+                  "key": "id",
+                  "value": ":id"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "200 Deleted",
+              "originalRequest": {},
+              "status": "OK"
+            },
+            {
+              "code": 404,
+              "name": "404 Resource not found",
+              "originalRequest": {},
+              "status": "Not Found"
+            }
+          ]
+        }
+      ],
+      "name": "Projects"
+    }
+  ],
+  "variable": []
+}

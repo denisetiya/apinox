@@ -1,0 +1,370 @@
+{
+  "__export_date": "2026-06-17T07:48:54.194574375+00:00",
+  "__export_format": 4,
+  "__export_source": "apinox",
+  "resources": [
+    {
+      "_id": "apinox_ws_atomix-cloud-api",
+      "_type": "workspace",
+      "description": "Atomix Cloud — self-hosted PaaS platform API (GitHub OAuth, projects, deployments, databases, domains)",
+      "name": "atomix-cloud-api",
+      "scope": "collection"
+    },
+    {
+      "_id": "apinox_ws_atomix-cloud-api_cookie_jar",
+      "_type": "cookie_jar",
+      "cookies": [],
+      "parentId": "apinox_ws_atomix-cloud-api"
+    },
+    {
+      "_id": "apinox_ws_atomix-cloud-api_env_base",
+      "_type": "environment",
+      "data": {
+        "base_url": "https://cloud.denisetiya.site/api"
+      },
+      "name": "Base Environment",
+      "parentId": "apinox_ws_atomix-cloud-api"
+    },
+    {
+      "_id": "apinox_env_local",
+      "_type": "environment",
+      "data": {
+        "base_url": "http://localhost:8080"
+      },
+      "name": "local",
+      "parentId": "apinox_ws_atomix-cloud-api_env_base"
+    },
+    {
+      "_id": "apinox_folder_auth",
+      "_type": "request_group",
+      "description": "GitHub OAuth login & user session",
+      "name": "Authentication",
+      "parentId": "apinox_ws_atomix-cloud-api"
+    },
+    {
+      "_id": "apinox_folder_projects",
+      "_type": "request_group",
+      "description": "Repository project management",
+      "name": "Projects",
+      "parentId": "apinox_ws_atomix-cloud-api"
+    },
+    {
+      "_id": "apinox_folder_deployments",
+      "_type": "request_group",
+      "description": "Build, deploy, rollback, logs",
+      "name": "Deployments",
+      "parentId": "apinox_ws_atomix-cloud-api"
+    },
+    {
+      "_id": "apinox_folder_env",
+      "_type": "request_group",
+      "description": "Per-project env var management",
+      "name": "Environment Variables",
+      "parentId": "apinox_ws_atomix-cloud-api"
+    },
+    {
+      "_id": "apinox_folder_domains",
+      "_type": "request_group",
+      "description": "Custom domain binding & SSL",
+      "name": "Custom Domains",
+      "parentId": "apinox_ws_atomix-cloud-api"
+    },
+    {
+      "_id": "apinox_folder_databases",
+      "_type": "request_group",
+      "description": "Database provisioning (PG, MySQL, MongoDB, Redis)",
+      "name": "Databases",
+      "parentId": "apinox_ws_atomix-cloud-api"
+    },
+    {
+      "_id": "apinox_req_auth-login",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "Redirect to GitHub OAuth consent screen. Returns 302 to github.com/login/oauth/authorize.",
+      "headers": [],
+      "method": "GET",
+      "name": "Initiate GitHub OAuth",
+      "parameters": [],
+      "parentId": "apinox_folder_auth",
+      "url": "https://cloud.denisetiya.site/api/auth/github"
+    },
+    {
+      "_id": "apinox_req_auth-callback",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "GitHub redirects here with ?code=xxx. Exchanges code for token, creates/updates user, returns JWT.",
+      "headers": [],
+      "method": "GET",
+      "name": "GitHub OAuth Callback",
+      "parameters": [
+        {
+          "description": "OAuth authorization code from GitHub",
+          "disabled": false,
+          "name": "code",
+          "value": ""
+        },
+        {
+          "description": "CSRF state parameter",
+          "disabled": false,
+          "name": "state",
+          "value": ""
+        }
+      ],
+      "parentId": "apinox_folder_auth",
+      "url": "https://cloud.denisetiya.site/api/auth/github/callback"
+    },
+    {
+      "_id": "apinox_req_auth-me",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "Get authenticated user profile from JWT token.",
+      "headers": [],
+      "method": "GET",
+      "name": "Get Current User",
+      "parameters": [],
+      "parentId": "apinox_folder_auth",
+      "url": "https://cloud.denisetiya.site/api/auth/me"
+    },
+    {
+      "_id": "apinox_req_auth-logout",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "Invalidate current JWT session.",
+      "headers": [],
+      "method": "POST",
+      "name": "Logout",
+      "parameters": [],
+      "parentId": "apinox_folder_auth",
+      "url": "https://cloud.denisetiya.site/api/auth/logout"
+    },
+    {
+      "_id": "apinox_req_github-list-repos",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "List authenticated user's GitHub repositories (via GitHub API with user's token).",
+      "headers": [],
+      "method": "GET",
+      "name": "List User GitHub Repos",
+      "parameters": [
+        {
+          "description": "",
+          "disabled": false,
+          "name": "page",
+          "value": "1"
+        },
+        {
+          "description": "",
+          "disabled": false,
+          "name": "per_page",
+          "value": "30"
+        },
+        {
+          "description": "",
+          "disabled": false,
+          "name": "sort",
+          "value": "\"updated\""
+        }
+      ],
+      "parentId": "apinox_folder_auth",
+      "url": "https://cloud.denisetiya.site/api/auth/github/repos"
+    },
+    {
+      "_id": "apinox_req_list-projects",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "List all projects for authenticated user.",
+      "headers": [],
+      "method": "GET",
+      "name": "List Projects",
+      "parameters": [
+        {
+          "description": "",
+          "disabled": false,
+          "name": "page",
+          "value": "1"
+        },
+        {
+          "description": "",
+          "disabled": false,
+          "name": "per_page",
+          "value": "20"
+        }
+      ],
+      "parentId": "apinox_folder_projects",
+      "url": "https://cloud.denisetiya.site/api/projects"
+    },
+    {
+      "_id": "apinox_req_create-project",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"atomix-cloud\",\n  \"repo_branch\": \"main\",\n  \"repo_url\": \"https://github.com/denisetiya/atomix-cloud.git\"\n}"
+      },
+      "description": "Create a new project from a GitHub repository. Clones repo, detects framework, triggers first deploy.",
+      "headers": [],
+      "method": "POST",
+      "name": "Create Project",
+      "parameters": [],
+      "parentId": "apinox_folder_projects",
+      "url": "https://cloud.denisetiya.site/api/projects"
+    },
+    {
+      "_id": "apinox_req_get-project",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "Get project details by ID.",
+      "headers": [],
+      "method": "GET",
+      "name": "Get Project",
+      "parameters": [],
+      "parentId": "apinox_folder_projects",
+      "url": "https://cloud.denisetiya.site/api/projects/{id}"
+    },
+    {
+      "_id": "apinox_req_update-project",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{}"
+      },
+      "description": "Update project settings. Triggers new deployment if build/start commands changed.",
+      "headers": [],
+      "method": "PUT",
+      "name": "Update Project",
+      "parameters": [],
+      "parentId": "apinox_folder_projects",
+      "url": "https://cloud.denisetiya.site/api/projects/{id}"
+    },
+    {
+      "_id": "apinox_req_delete-project",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "Delete project and all associated resources (containers, env vars, domains, databases).",
+      "headers": [],
+      "method": "DELETE",
+      "name": "Delete Project",
+      "parameters": [],
+      "parentId": "apinox_folder_projects",
+      "url": "https://cloud.denisetiya.site/api/projects/{id}"
+    },
+    {
+      "_id": "apinox_req_trigger-deploy",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "Trigger a new deployment. Pulls latest code, builds, and deploys.",
+      "headers": [],
+      "method": "POST",
+      "name": "Trigger Deployment",
+      "parameters": [],
+      "parentId": "apinox_folder_deployments",
+      "url": "https://cloud.denisetiya.site/api/projects/{id}/deploy"
+    },
+    {
+      "_id": "apinox_req_list-deployments",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "List all deployments for a project, newest first.",
+      "headers": [],
+      "method": "GET",
+      "name": "List Deployments",
+      "parameters": [
+        {
+          "description": "",
+          "disabled": false,
+          "name": "page",
+          "value": "1"
+        },
+        {
+          "description": "",
+          "disabled": false,
+          "name": "per_page",
+          "value": "20"
+        }
+      ],
+      "parentId": "apinox_folder_deployments",
+      "url": "https://cloud.denisetiya.site/api/projects/{id}/deployments"
+    },
+    {
+      "_id": "apinox_req_get-deployment",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "Get single deployment details.",
+      "headers": [],
+      "method": "GET",
+      "name": "Get Deployment",
+      "parameters": [],
+      "parentId": "apinox_folder_deployments",
+      "url": "https://cloud.denisetiya.site/api/deployments/{id}"
+    },
+    {
+      "_id": "apinox_req_get-deployment-logs",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer ",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "Get build and deploy logs for a deployment.",
+      "headers": [],
+      "method": "GET",
+      "name": "Get Deployment Logs",
+      "parameters": [],
+      "parentId": "apinox_folder_deployments",
+      "url": "https://cloud.denisetiya.site/api/deployments/{id}/logs"
+    }
+  ]
+}

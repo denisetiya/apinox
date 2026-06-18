@@ -1,0 +1,65 @@
+{
+  "__export_date": "2026-06-17T06:54:19.662670530+00:00",
+  "__export_format": 4,
+  "__export_source": "apinox",
+  "resources": [
+    {
+      "_id": "apinox_ws_atomix-cloud-modular",
+      "_type": "workspace",
+      "description": "Modular test with includes",
+      "name": "atomix-cloud-modular",
+      "scope": "collection"
+    },
+    {
+      "_id": "apinox_ws_atomix-cloud-modular_cookie_jar",
+      "_type": "cookie_jar",
+      "cookies": [],
+      "parentId": "apinox_ws_atomix-cloud-modular"
+    },
+    {
+      "_id": "apinox_ws_atomix-cloud-modular_env_base",
+      "_type": "environment",
+      "data": {
+        "base_url": "https://api.denisetiya.site/v1"
+      },
+      "name": "Base Environment",
+      "parentId": "apinox_ws_atomix-cloud-modular"
+    },
+    {
+      "_id": "apinox_folder_products",
+      "_type": "request_group",
+      "description": "Product catalog",
+      "name": "Products",
+      "parentId": "apinox_ws_atomix-cloud-modular"
+    },
+    {
+      "_id": "apinox_req_list-products",
+      "_type": "request",
+      "authentication": {
+        "prefix": "Bearer",
+        "token": "{{ _.token }}",
+        "type": "bearer"
+      },
+      "description": "Get all products",
+      "headers": [],
+      "method": "GET",
+      "name": "List Products",
+      "parameters": [
+        {
+          "description": "",
+          "disabled": false,
+          "name": "page",
+          "value": "1"
+        },
+        {
+          "description": "",
+          "disabled": false,
+          "name": "per_page",
+          "value": "20"
+        }
+      ],
+      "parentId": "apinox_folder_products",
+      "url": "https://api.denisetiya.site/v1/products"
+    }
+  ]
+}

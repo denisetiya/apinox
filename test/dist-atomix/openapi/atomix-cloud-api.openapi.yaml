@@ -1,0 +1,782 @@
+openapi: 3.1.0
+info:
+  title: atomix-cloud-api
+  version: 1.0.0
+  description: Atomix Cloud — self-hosted PaaS platform API (GitHub OAuth, projects, deployments, databases, domains)
+servers:
+- url: https://cloud.denisetiya.site/api
+  description: production
+- url: http://localhost:8080
+  description: local
+components:
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+paths:
+  /auth/github:
+    get:
+      operationId: auth-login
+      summary: Initiate GitHub OAuth
+      description: Redirect to GitHub OAuth consent screen. Returns 302 to github.com/login/oauth/authorize.
+      tags:
+      - Authentication
+      responses:
+        '302':
+          description: Redirect to GitHub
+  /auth/github/callback:
+    get:
+      operationId: auth-callback
+      summary: GitHub OAuth Callback
+      description: GitHub redirects here with ?code=xxx. Exchanges code for token, creates/updates user, returns JWT.
+      tags:
+      - Authentication
+      parameters:
+      - name: code
+        in: query
+        required: true
+        schema:
+          type: string
+          description: OAuth authorization code from GitHub
+        description: OAuth authorization code from GitHub
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+          description: CSRF state parameter
+        description: CSRF state parameter
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT Bearer token
+                  user:
+                    type: object
+          examples:
+            success:
+              summary: success
+              value: |-
+                {
+                  "token": "eyJhbG...NiIs...",
+                  "user": {
+                    "avatar_url": "https://avatars.githubusercontent.com/u/12345",
+                    "created_at": "2026-01-15T08:30:00Z",
+                    "email": "deni@example.com",
+                    "id": "550e8400-e29b-41d4-a716-446655440000",
+                    "username": "denisetiya"
+                  }
+                }
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /auth/me:
+    get:
+      operationId: auth-me
+      summary: Get Current User
+      description: Get authenticated user profile from JWT token.
+      tags:
+      - Authentication
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  github_id:
+                    type: integer
+                  email:
+                    type: string
+                  avatar_url:
+                    type: string
+                  created_at:
+                    type: string
+                  id:
+                    type: string
+          examples:
+            success:
+              summary: success
+              value: |-
+                {
+                  "avatar_url": "https://avatars.githubusercontent.com/u/12345",
+                  "created_at": "2026-01-15T08:30:00Z",
+                  "email": "deni@example.com",
+                  "github_id": 12345678,
+                  "id": "550e8400-e29b-41d4-a716-446655440000",
+                  "username": "denisetiya"
+                }
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+  /auth/logout:
+    post:
+      operationId: auth-logout
+      summary: Logout
+      description: Invalidate current JWT session.
+      tags:
+      - Authentication
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /auth/github/repos:
+    get:
+      operationId: github-list-repos
+      summary: List User GitHub Repos
+      description: List authenticated user's GitHub repositories (via GitHub API with user's token).
+      tags:
+      - Authentication
+      parameters:
+      - name: page
+        in: query
+        required: true
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: true
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of repos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  clone_url:
+                    type: string
+                  description:
+                    type: string
+                  default_branch:
+                    type: string
+                  private:
+                    type: boolean
+                  full_name:
+                    type: string
+                  language:
+                    type: string
+          examples:
+            sample:
+              summary: sample
+              value: |-
+                [
+                  {
+                    "clone_url": "https://github.com/denisetiya/atomix-cloud.git",
+                    "default_branch": "main",
+                    "description": "Self-hosted PaaS",
+                    "full_name": "denisetiya/atomix-cloud",
+                    "language": "Rust",
+                    "name": "atomix-cloud",
+                    "private": false
+                  },
+                  {
+                    "clone_url": "https://github.com/denisetiya/my-astro-blog.git",
+                    "default_branch": "main",
+                    "description": null,
+                    "full_name": "denisetiya/my-astro-blog",
+                    "language": "TypeScript",
+                    "name": "my-astro-blog",
+                    "private": false
+                  }
+                ]
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
+  /projects:
+    get:
+      operationId: list-projects
+      summary: List Projects
+      description: List all projects for authenticated user.
+      tags:
+      - Projects
+      parameters:
+      - name: page
+        in: query
+        required: true
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Paginated project list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  per_page:
+                    type: integer
+                  page:
+                    type: integer
+                  total:
+                    type: integer
+          examples:
+            default:
+              summary: default
+              value: |-
+                {
+                  "page": 1,
+                  "per_page": 20,
+                  "projects": [
+                    {
+                      "created_at": "2026-03-01T10:00:00Z",
+                      "framework": "axum",
+                      "id": "proj_a1b2c3",
+                      "language": "rust",
+                      "name": "atomix-cloud",
+                      "port": 8080,
+                      "repo_branch": "main",
+                      "repo_url": "https://github.com/denisetiya/atomix-cloud.git",
+                      "status": "running",
+                      "updated_at": "2026-06-15T14:30:00Z"
+                    }
+                  ],
+                  "total": 1
+                }
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
+    post:
+      operationId: create-project
+      summary: Create Project
+      description: Create a new project from a GitHub repository. Clones repo, detects framework, triggers first deploy.
+      tags:
+      - Projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                build_command:
+                  type: string
+                  description: Custom build command
+                start_command:
+                  type: string
+                  description: Custom start command
+                name:
+                  type: string
+                  description: Project display name
+                repo_url:
+                  type: string
+                  description: Git clone URL
+                repo_branch:
+                  type: string
+                  description: Branch to deploy
+                framework:
+                  type: string
+                  description: Override auto-detected framework (axum, astro, nextjs, express, flask, etc)
+                port:
+                  type: integer
+                  description: Container internal port (auto-detected if omitted)
+              required:
+              - name
+              - repo_url
+            example: |-
+              {
+                "name": "atomix-cloud",
+                "repo_branch": "main",
+                "repo_url": "https://github.com/denisetiya/atomix-cloud.git"
+              }
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repo_url:
+                    type: string
+                  framework:
+                    type: string
+                  repo_branch:
+                    type: string
+                  created_at:
+                    type: string
+                  name:
+                    type: string
+                  language:
+                    type: string
+                  updated_at:
+                    type: string
+                  port:
+                    type: integer
+                  status:
+                    type: string
+                  id:
+                    type: string
+          examples:
+            created:
+              summary: created
+              value: |-
+                {
+                  "created_at": "2026-06-17T12:00:00Z",
+                  "framework": "axum",
+                  "id": "proj_x9y8z7",
+                  "language": "rust",
+                  "name": "atomix-cloud",
+                  "port": 8080,
+                  "repo_branch": "main",
+                  "repo_url": "https://github.com/denisetiya/atomix-cloud.git",
+                  "status": "pending",
+                  "updated_at": "2026-06-17T12:00:00Z"
+                }
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '409':
+          description: Project with same name already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
+  /projects/{id}:
+    get:
+      operationId: get-project
+      summary: Get Project
+      description: Get project details by ID.
+      tags:
+      - Projects
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: Project ID (e.g. proj_a1b2c3)
+        description: Project ID (e.g. proj_a1b2c3)
+      responses:
+        '200':
+          description: Project details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created_at:
+                    type: string
+                  status:
+                    type: string
+                  framework:
+                    type: string
+                  language:
+                    type: string
+                  id:
+                    type: string
+                  repo_branch:
+                    type: string
+                  updated_at:
+                    type: string
+                  port:
+                    type: integer
+                  name:
+                    type: string
+                  repo_url:
+                    type: string
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+    put:
+      operationId: update-project
+      summary: Update Project
+      description: Update project settings. Triggers new deployment if build/start commands changed.
+      tags:
+      - Projects
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                framework:
+                  type: string
+                build_command:
+                  type: string
+                repo_branch:
+                  type: string
+                port:
+                  type: integer
+                start_command:
+                  type: string
+      responses:
+        '200':
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated_at:
+                    type: string
+                  id:
+                    type: string
+                  created_at:
+                    type: string
+                  repo_branch:
+                    type: string
+                  framework:
+                    type: string
+                  repo_url:
+                    type: string
+                  name:
+                    type: string
+                  status:
+                    type: string
+                  port:
+                    type: integer
+                  language:
+                    type: string
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+    delete:
+      operationId: delete-project
+      summary: Delete Project
+      description: Delete project and all associated resources (containers, env vars, domains, databases).
+      tags:
+      - Projects
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+  /projects/{id}/deploy:
+    post:
+      operationId: trigger-deploy
+      summary: Trigger Deployment
+      description: Trigger a new deployment. Pulls latest code, builds, and deploys.
+      tags:
+      - Deployments
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Deployment triggered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created_at:
+                    type: string
+                  project_id:
+                    type: string
+                  status:
+                    type: string
+                  commit_sha:
+                    type: string
+                  id:
+                    type: string
+                  build_logs:
+                    type: string
+                  finished_at:
+                    type: string
+                  deploy_logs:
+                    type: string
+                  commit_message:
+                    type: string
+                  branch:
+                    type: string
+          examples:
+            triggered:
+              summary: triggered
+              value: |-
+                {
+                  "branch": "main",
+                  "build_logs": "",
+                  "commit_message": "feat: add database provisioning",
+                  "commit_sha": "abc1234",
+                  "created_at": "2026-06-17T12:05:00Z",
+                  "deploy_logs": "",
+                  "finished_at": null,
+                  "id": "dpl_m1n2o3",
+                  "project_id": "proj_a1b2c3",
+                  "status": "building"
+                }
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  retry_after:
+                    type: integer
+                  error:
+                    type: string
+  /projects/{id}/deployments:
+    get:
+      operationId: list-deployments
+      summary: List Deployments
+      description: List all deployments for a project, newest first.
+      tags:
+      - Deployments
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: true
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Deployment list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+  /deployments/{id}:
+    get:
+      operationId: get-deployment
+      summary: Get Deployment
+      description: Get single deployment details.
+      tags:
+      - Deployments
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Deployment details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deploy_logs:
+                    type: string
+                  created_at:
+                    type: string
+                  id:
+                    type: string
+                  finished_at:
+                    type: string
+                  project_id:
+                    type: string
+                  branch:
+                    type: string
+                  commit_message:
+                    type: string
+                  commit_sha:
+                    type: string
+                  status:
+                    type: string
+                  build_logs:
+                    type: string
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
+  /deployments/{id}/logs:
+    get:
+      operationId: get-deployment-logs
+      summary: Get Deployment Logs
+      description: Get build and deploy logs for a deployment.
+      tags:
+      - Deployments
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deploy_logs:
+                    type: string
+                    description: Full deploy log output
+                  build_logs:
+                    type: string
+                    description: Full build log output
+          examples:
+            success:
+              summary: success
+              value: |-
+                {
+                  "build_logs": "[build] Pulling latest commits...\n[build] Detected framework: axum (Rust)\n[build] cargo build --release\n[build]    Compiling atomix-cloud v0.1.0\n[build]     Finished release [optimized] in 42.3s\n[build] Build complete (43.1s)\n",
+                  "deploy_logs": ""
+                }
