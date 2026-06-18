@@ -55,9 +55,9 @@ fn build_hurl_file(schema: &ApinoxSchema) -> String {
 }
 
 /// Group endpoints by their group field
-fn group_endpoints<'a>(
-    schema: &'a ApinoxSchema,
-) -> Vec<(String, Vec<&'a crate::schema::endpoint::Endpoint>)> {
+fn group_endpoints(
+    schema: &ApinoxSchema,
+) -> Vec<(String, Vec<&crate::schema::endpoint::Endpoint>)> {
     let mut groups: std::collections::BTreeMap<String, Vec<&crate::schema::endpoint::Endpoint>> =
         std::collections::BTreeMap::new();
 
@@ -302,7 +302,7 @@ fn build_curl_command(schema: &ApinoxSchema, ep: &crate::schema::endpoint::Endpo
     lines.push(format!("# {} - {}", ep.name, method));
 
     let mut cmd = String::from("curl -s");
-    cmd.push_str(&format!(" -w '\\nHTTP Status: %{{http_code}}\\n'"));
+    cmd.push_str(" -w '\\\\nHTTP Status: %{http_code}\\\\n'");
     cmd.push_str(&format!(" -X {}", method));
 
     // Headers

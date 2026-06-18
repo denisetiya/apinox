@@ -248,7 +248,7 @@ pub fn import_openapi(path: &Path) -> Result<ApinoxSchema> {
     let content = std::fs::read_to_string(path)
         .with_context(|| format!("Failed to read: {}", path.display()))?;
 
-    let doc: OpenApiDoc = if path.extension().map_or(false, |e| e == "json") {
+    let doc: OpenApiDoc = if path.extension().is_some_and(|e| e == "json") {
         serde_json::from_str(&content)
             .with_context(|| format!("Invalid JSON in: {}", path.display()))?
     } else {
@@ -452,7 +452,7 @@ fn convert_swagger_2_endpoint(
                         description,
                         headers: Vec::new(),
                         content_type,
-                        schema: resp.schema.as_ref().map(|s| schema_to_field_map(s)),
+                        schema: resp.schema.as_ref().map(schema_to_field_map),
                         examples: Vec::new(),
                         use_pattern: None,
                     })
@@ -509,7 +509,7 @@ fn build_swagger_2_body(
     };
 
     if let Some(bp) = body_param {
-        let schema = bp.schema.as_ref().map(|s| schema_to_field_map(s));
+        let schema = bp.schema.as_ref().map(schema_to_field_map);
         return Some(Body {
             body_type: body_type.to_string(),
             required: bp.required.unwrap_or(false),
@@ -741,7 +741,7 @@ fn convert_oa3_endpoint(
             _ => "json",
         };
 
-        let schema = media.schema.as_ref().map(|s| schema_to_field_map(s));
+        let schema = media.schema.as_ref().map(schema_to_field_map);
 
         // Build fields for formdata from schema properties
         let fields = if body_type == "formdata" {
@@ -817,7 +817,7 @@ fn convert_oa3_endpoint(
                     // OA3 responses use content map
                     let (content_type, schema, examples) = if let Some(ref content) = resp.content {
                         if let Some((ct, media)) = content.iter().next() {
-                            let s = media.schema.as_ref().map(|s| schema_to_field_map(s));
+                            let s = media.schema.as_ref().map(schema_to_field_map);
                             let ex = collect_response_media_examples(media);
                             (Some(ct.clone()), s, ex)
                         } else {

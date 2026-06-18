@@ -23,7 +23,7 @@ impl Parser {
         let content = std::fs::read_to_string(path)
             .with_context(|| format!("Failed to read: {}", path.display()))?;
 
-        let mut schema = if path.extension().map_or(false, |e| e == "json") {
+        let mut schema = if path.extension().is_some_and(|e| e == "json") {
             serde_json::from_str::<ApinoxSchema>(&content)
                 .with_context(|| format!("Invalid JSON in: {}", path.display()))?
         } else {
@@ -52,7 +52,7 @@ impl Parser {
         let content = std::fs::read_to_string(path)
             .with_context(|| format!("Failed to read include: {}", path.display()))?;
 
-        if path.extension().map_or(false, |e| e == "json") {
+        if path.extension().is_some_and(|e| e == "json") {
             serde_json::from_str(&content)
                 .with_context(|| format!("Invalid JSON in include: {}", path.display()))
         } else {

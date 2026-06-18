@@ -63,7 +63,7 @@ fn build_collection(schema: &ApinoxSchema) -> Result<Value> {
         let group_auth = schema
             .groups
             .iter()
-            .find(|g| &g.name == group_name || &g.id == group_name.as_str())
+            .find(|g| &g.name == group_name || g.id == group_name.as_str())
             .and_then(|g| g.auth.as_ref())
             .map(|a| build_auth_for_scheme(schema, a));
 
@@ -130,9 +130,9 @@ fn build_collection(schema: &ApinoxSchema) -> Result<Value> {
 }
 
 /// Group endpoints by their group field
-fn group_endpoints<'a>(
-    schema: &'a ApinoxSchema,
-) -> HashMap<String, Vec<&'a crate::schema::endpoint::Endpoint>> {
+fn group_endpoints(
+    schema: &ApinoxSchema,
+) -> HashMap<String, Vec<&crate::schema::endpoint::Endpoint>> {
     let mut map: HashMap<String, Vec<&crate::schema::endpoint::Endpoint>> = HashMap::new();
 
     for ep in &schema.endpoints {
@@ -230,7 +230,7 @@ fn build_request(schema: &ApinoxSchema, ep: &crate::schema::endpoint::Endpoint) 
         .collect();
 
     // Body
-    let body = ep.body.as_ref().map(|b| build_body(b));
+    let body = ep.body.as_ref().map(build_body);
 
     // Auth
     let auth = ep.auth.as_ref().map(|a| build_auth_for_scheme(schema, a));
@@ -535,11 +535,12 @@ fn faker_value(field_type: &str, field_name: &str) -> String {
         "datetime" => "{{$timestamp}}".into(),
         "integer" | "float" => "{{$randomInt}}".into(),
         "boolean" => "true".into(),
-        _ => format!("{{$randomWord}}"),
+        _ => "{{$randomWord}}".to_string(),
     }
 }
 
 /// Check if a field is sensitive (should be masked in generated output)
+#[allow(dead_code)]
 fn is_sensitive(field_name: &str) -> bool {
     let name = field_name.to_lowercase();
     name.contains("password")
