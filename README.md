@@ -1,132 +1,63 @@
-# Apinox
+<p align="center">
+  <svg viewBox="0 0 26 26" width="52" height="52" fill="none">
+    <rect width="26" height="26" rx="5" fill="#3b82f6"/>
+    <path d="M6 8.5h14M6 13h9M6 17.5h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="20" cy="17.5" r="2.5" fill="#22c55e"/>
+  </svg>
+</p>
 
-**Schema-first API Documentation Generator** — Define your API once in YAML/JSON, generate **7 output formats** from a single source of truth.
+<h1 align="center">Apinox</h1>
+<p align="center">
+  <strong>Schema-first API Documentation Generator</strong><br>
+  Define once in YAML/JSON. Generate <strong>7 formats</strong> from a single source of truth.
+</p>
 
+<p align="center">
+  <a href="https://github.com/denisetiya/apinox/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/denisetiya/apinox/release.yml?branch=master&label=CI&logo=github" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/denisetiya/apinox?color=blue" alt="License"></a>
+  <a href="https://github.com/denisetiya/apinox/releases"><img src="https://img.shields.io/github/v/release/denisetiya/apinox?logo=rust" alt="Release"></a>
+  <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/rust-1.70%2B-f74c00?logo=rust" alt="Rust"></a>
+  <a href="https://apinox.denisetiya.site/docs/"><img src="https://img.shields.io/badge/docs-apinox.denisetiya.site-3b82f6" alt="Docs"></a>
+</p>
+
+```text
+┌─────────────┐     ┌──────────────┐     ┌──────────────────────────────────────────┐
+│  Schema     │     │  apinox      │     │  dist/                                   │
+│  (YAML/JSON)│ ──→ │  validate +  │ ──→ │  ├── postman/   (.postman_collection.json)│
+│             │     │  build       │     │  ├── openapi/   (.openapi.yaml)           │
+│  groups     │     │  watch       │     │  ├── docs/      (.md + .scalar.html)     │
+│  endpoints  │     │  diff        │     │  ├── insomnia/  (.insomnia.json)          │
+│  auth/envs  │     │  migrate     │     │  └── hurl/      (.hurl + .sh)            │
+│  examples   │     │  import      │     └──────────────────────────────────────────┘
+└─────────────┘     │  sync        │
+                    └──────────────┘
 ```
-Schema (YAML/JSON) → Postman Collection
-                   → OpenAPI 3.1 Spec
-                   → Markdown Docs
-                   → Scalar Interactive Docs
-                   → Insomnia Import
-                   → Hurl Test Scripts
-                   → Curl Commands
-```
-
-[![CI](https://github.com/denisetiya/apinox/actions/workflows/release.yml/badge.svg)](https://github.com/denisetiya/apinox/actions/workflows/release.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ---
 
-## Table of Contents
+## Why Apinox?
 
-- [Features](#features)
-- [Installation](#installation)
-  - [Linux / macOS](#linux--macos)
-  - [Windows](#windows)
-  - [Manual](#manual)
-- [Quick Start](#quick-start)
-- [Schema Format](#schema-format)
-  - [Root Fields](#root-fields)
-  - [Auth](#auth)
-  - [Environments](#environments)
-  - [Groups](#groups)
-  - [Endpoints](#endpoints)
-  - [Reusable Error Patterns](#reusable-error-patterns)
-  - [Schema Includes (Modular)](#schema-includes-modular)
-- [CLI Commands](#cli-commands)
-  - [`validate`](#validate)
-  - [`build`](#build)
-  - [`watch`](#watch)
-  - [`diff`](#diff)
-  - [`migrate`](#migrate)
-  - [`import`](#import)
-  - [`sync`](#sync)
-- [Output Formats](#output-formats)
-  - [Postman Collection](#postman-collection)
-  - [OpenAPI 3.1](#openapi-31)
-  - [Markdown Documentation](#markdown-documentation)
-  - [Scalar Interactive Docs](#scalar-interactive-docs)
-  - [Insomnia Import](#insomnia-import)
-  - [Hurl Test Scripts](#hurl-test-scripts)
-- [CI/CD Integration](#cicd-integration)
-- [Changelog & Diff](#changelog--diff)
-- [Modular Schemas](#modular-schemas)
-- [Postman Sync](#postman-sync)
-- [Build from Source](#build-from-source)
-- [Contributing](#contributing)
-- [License](#license)
+API documentation should come from **one source of truth**, not five hand-maintained files that drift apart over time.
+
+- **Stop duplicating** — write your API shape once, export everywhere
+- **No context switching** — Postman, OpenAPI, Markdown, Insomnia, Hurl from a single `apinox build`
+- **Validation built-in** — catch broken references, missing fields, typos *before* they reach your team
+- **CI-ready** — validate schemas in CI, auto-generate docs on release
 
 ---
 
-## Features
-
-- **Single source of truth** — Define endpoints, schemas, auth, and examples once
-- **7 output formats** — Postman, OpenAPI 3.1, Markdown, Scalar, Insomnia, Hurl, curl
-- **Validation** — Catch missing fields, duplicate IDs, broken auth/group refs, path-param mismatches before generating
-- **File watching** — `apinox watch` auto-rebuilds on schema changes (great for dev workflow)
-- **OpenAPI import** — Convert existing OpenAPI 3.x / Swagger 2.0 specs to Apinox schema
-- **Schema diff** — Compare two schema versions (breaking changes, additions, removals)
-- **Migration guide** — Generate human-readable migration guides between schema versions
-- **Postman sync** — Push generated collections directly to Postman workspace
-- **Modular includes** — Split large schemas into multiple files with `includes`
-- **Changelog tracking** — Endpoint-level changelog within the schema for version tracking
-- **Cross-platform** — Linux, macOS, Windows (x86_64 + ARM64)
-
----
-
-## Installation
-
-### Linux / macOS
+## Quick Start (30 seconds)
 
 ```bash
+# 1. Install
 curl -sSL https://apinox.denisetiya.site/install.sh | bash
-```
 
-### Windows (PowerShell)
-
-```powershell
-irm https://apinox.denisetiya.site/install.ps1 | iex
-```
-
-### Manual
-
-Download the latest binary from the [releases page](https://github.com/denisetiya/apinox/releases):
-
-| Platform | Binary |
-|----------|--------|
-| Linux x86_64 | `apinox-linux-x86_64` |
-| Linux ARM64 | `apinox-linux-aarch64` |
-| macOS x86_64 | `apinox-macos-x86_64` |
-| macOS ARM64 | `apinox-macos-aarch64` |
-| Windows x86_64 | `apinox-windows-x86_64.exe` |
-
-Place the binary in your `$PATH` and make it executable:
-
-```bash
-chmod +x apinox-*
-sudo mv apinox-linux-x86_64 /usr/local/bin/apinox
-```
-
-Verify:
-
-```bash
-apinox --version
-apinox --help
-```
-
----
-
-## Quick Start
-
-1. Create a schema file `api-spec.yml`:
-
-```yaml
+# 2. Create a schema
+cat > api-spec.yml << 'EOF'
 apinox: "1.0"
 name: my-api
 version: 1.0.0
-description: My first API
 base_url: https://api.example.com/v1
-
 auth:
   default: bearer
   schemes:
@@ -135,325 +66,203 @@ auth:
       scheme: bearer
       header: Authorization
       prefix: "Bearer "
-
 groups:
   - id: users
     name: Users
-    description: User management
-
 endpoints:
   - id: list-users
     name: List Users
     group: users
     method: GET
     path: /users
-    query_params:
-      - name: page
-        type: integer
-        required: false
-        description: Page number
     responses:
       - status: 200
         description: Success
         examples:
           - name: default
-            value:
-              - id: "usr_1"
-                name: "John Doe"
-                email: "john@example.com"
-```
+            value: [{id: "usr_1", name: "John Doe"}]
+EOF
 
-2. Validate:
-
-```bash
+# 3. Validate
 apinox validate api-spec.yml
-```
 
-3. Generate all docs:
-
-```bash
+# 4. Generate all 7 formats
 apinox build api-spec.yml -o ./dist
 ```
 
-4. See the output:
+Done. Your docs are in `dist/`.
 
-```
-dist/
-├── docs/
-│   ├── my-api.md
-│   └── my-api.scalar.html
-├── hurl/
-│   ├── my-api.hurl
-│   └── my-api.sh
-├── insomnia/
-│   └── my-api.insomnia.json
-├── openapi/
-│   └── my-api.openapi.yaml
-└── postman/
-    └── my-api.postman_collection.json
-```
+---
+
+## Installation
+
+| Platform | Command |
+|----------|---------|
+| **Linux / macOS** | `curl -sSL https://apinox.denisetiya.site/install.sh \| bash` |
+| **Windows** | `irm https://apinox.denisetiya.site/install.ps1 \| iex` |
+| **Cargo** | `cargo install apinox` |
+
+Or download the binary from [GitHub Releases](https://github.com/denisetiya/apinox/releases) and place it in your `$PATH`.
+
+---
+
+## Full Documentation
+
+📖 **Detailed docs, schema reference, CLI reference, guides, and FAQ** → **[apinox.denisetiya.site/docs/](https://apinox.denisetiya.site/docs/)**
 
 ---
 
 ## Schema Format
 
-### Root Fields
+A single YAML file describing your entire API:
 
 ```yaml
-apinox: "1.0"                  # Schema spec version (required)
+apinox: "1.0"                 # Schema spec version (required)
 name: my-api                   # API name (required)
 version: 1.0.0                 # API version (required)
-description: My API description # Optional
-base_url: https://api.example.com/v1  # Optional base URL
-```
+description: My API            # Optional
+base_url: https://api.example.com/v1
 
-### Auth
-
-```yaml
+# ── Authentication ──────────────────────────
 auth:
-  default: bearer       # Default auth scheme for all endpoints
+  default: bearer
   schemes:
     - id: bearer
-      type: http        # http | apiKey | basic | oauth2
-      scheme: bearer    # bearer | basic | digest
-      header: Authorization
-      prefix: "Bearer "
-      description: JWT Bearer token
+      type: http;    scheme: bearer
+      header: Authorization;  prefix: "Bearer "
     - id: api_key
-      type: apiKey
-      key: X-API-Key
-      in_location: header  # header | query
-      description: API key authentication
-```
+      type: apiKey;  key: X-API-Key
+      in_location: header
 
-Endpoints can override auth per-endpoint:
-```yaml
-- id: public-endpoint
-  method: GET
-  path: /public
-  auth: ~              # null = no auth
-```
-
-### Environments
-
-```yaml
+# ── Environments ────────────────────────────
 environments:
   - name: production
     base_url: https://api.example.com/v1
-    vars:
-      TOKEN: prod_token
+    vars: { TOKEN: "prod_xxx" }
   - name: development
     base_url: http://localhost:8080
-    vars:
-      TOKEN: dev_token
-```
+    vars: { TOKEN: "dev_xxx" }
 
-### Groups
-
-```yaml
+# ── Groups ──────────────────────────────────
 groups:
-  - id: users
-    name: Users
-    description: User management
-    auth: bearer         # Optional group-level auth override
-  - id: payments
-    name: Payments
-    description: Payment processing
-```
+  - id: users;     name: Users;     description: User management
+  - id: payments;  name: Payments;  description: Payment processing
 
-### Endpoints
-
-Full endpoint definition:
-
-```yaml
+# ── Endpoints ───────────────────────────────
 endpoints:
   - id: create-user
     name: Create User
-    group: users                    # References group id
+    group: users
     method: POST
     path: /users
-    description: |
-      Create a new user account.
-      Returns the created user object.
-    deprecated: false                # Optional
-    tags: [users, admin]             # Optional tags
-    auth: bearer                     # Auth override (null = no auth)
-    servers:                         # Optional per-endpoint server URL
-      production: https://api.example.com/v1
-      development: http://localhost:8080
-    rate_limit:                      # Optional rate limit info
-      requests: 100
-      window: 1m
+    description: Create a new user account
+    auth: bearer                    # Override default auth (~ for no-auth)
+    tags: [users, admin]
 
-    # Path parameters
+    # Path params: {user_id} in the path →
     path_params:
       - name: user_id
-        type: string
-        required: true
+        type: string;  required: true
         pattern: "^usr_[a-zA-Z0-9]+$"
-        description: User ID
         example: usr_abc123
 
-    # Query parameters
+    # Query params
     query_params:
-      - name: page
-        type: integer
-        required: false
-        min: 1
-        max: 100
-        default: 1
-        description: Page number
-      - name: sort
-        type: string
-        required: false
-        enum: [asc, desc]
-        default: asc
-        description: Sort order
-
-    # Request headers
-    headers:
-      - name: Idempotency-Key
-        value: ~
-        required: false
-        description: Prevent duplicate requests
-      - name: Content-Type
-        value: application/json
-        required: true
+      - name: page;  type: integer;  default: 1;  min: 1;  max: 100
+      - name: sort;  type: string;   enum: [asc, desc];  default: asc
 
     # Request body
     body:
-      type: json                      # json | formdata | urlencoded | binary | raw
+      type: json
       required: true
-      description: User creation payload
-      content_type: application/json   # Optional override
-      schema:                          # For JSON/urlencoded
-        name:
-          type: string
-          required: true
-          min_length: 2
-          max_length: 100
-          description: Full name
-        email:
-          type: email
-          required: true
-          description: Email address
-        role:
-          type: string
-          required: false
-          enum: [user, admin]
-          default: user
-          description: User role
+      schema:
+        name:     { type: string, required: true,  min_length: 2,  max_length: 100 }
+        email:    { type: email,  required: true }
+        password: { type: string, required: true,  sensitive: true,  min_length: 8 }
+        role:     { type: string, required: false, enum: [user, admin],  default: user }
       examples:
         - name: create_admin
-          description: Create an admin user
-          value:
-            name: Jane Doe
-            email: jane@example.com
-            role: admin
+          value: { name: "Jane Doe",  email: "jane@example.com",  password: "secret",  role: admin }
 
     # Responses
     responses:
       - status: 201
         description: User created
-        headers:
-          - name: Location
-            value: /users/usr_abc123
-        content_type: application/json
         examples:
           - name: success
-            value:
-              id: usr_abc123
-              name: Jane Doe
-              email: jane@example.com
-              role: admin
-              created_at: "2026-06-18T10:00:00Z"
+            value: { id: "usr_abc123",  name: "Jane Doe",  email: "jane@example.com",  role: admin }
       - status: 400
         description: Validation error
-        examples:
-          - name: validation_error
-            value:
-              error: validation_error
-              message: "email: Must be a valid email address"
+        use_pattern: validation_error      # ← Reusable error pattern
       - status: 401
-        description: Unauthorized
-        examples:
-          - name: unauthorized
-            value:
-              error: unauthorized
-              message: Invalid or expired token
-```
+        use_pattern: unauthorized
 
-**Form-data body** (file uploads):
-
-```yaml
-body:
-  type: formdata
-  fields:
-    - name: avatar
-      type: file
-      required: true
-      accept: [image/jpeg, image/png, image/webp]
-      max_size_mb: 5
-      description: Avatar image
-    - name: crop
-      type: string
-      default: square
-      enum: [square, circle, original]
-      description: Crop mode
-```
-
-### Reusable Error Patterns
-
-Define common error responses once and reference them:
-
-```yaml
+# ── Reusable Error Patterns ────────────────
 error_responses:
   patterns:
     - id: unauthorized
       status: 401
       description: Missing or invalid auth token
-      example:
-        error: unauthorized
-        message: Authentication required
-    - id: not_found
-      status: 404
-      description: Resource not found
-      example:
-        error: not_found
-        message: Resource not found
+      example: { error: unauthorized,  message: Authentication required }
+    - id: validation_error
+      status: 400
+      description: Validation failure
+      example: { error: validation_error,  message: "email: must be valid" }
 
-endpoints:
-  - id: get-user
-    method: GET
-    path: /users/{user_id}
-    responses:
-      - status: 200
-        description: Success
-        examples:
-          - name: default
-            value:
-              id: usr_abc123
-              name: John Doe
-      - status: 401
-        use_pattern: unauthorized       # Reuse error pattern
-      - status: 404
-        use_pattern: not_found         # Reuse error pattern
+# ── Changelog ──────────────────────────────
+changelog:
+  - version: 2.0.0
+    date: 2026-06-18
+    changes:
+      - endpoint: create-user
+        description: Added role field with admin/user enum
+  - version: 1.0.0
+    date: 2026-06-01
+    changes:
+      - endpoint: create-user
+        description: Initial implementation
 ```
 
-### Schema Includes (Modular)
+> ⚠️ **Important:** Response examples must use `examples: [{name: ..., value: ...}]` format. Do **not** use `body:` — it produces empty responses in generated output.
 
-Split large schemas across multiple files:
+### Field Schema Types
+
+| Type | Description | Validators |
+|------|-------------|------------|
+| `string` | Text value | `min_length`, `max_length`, `pattern`, `enum` |
+| `integer` | Whole number | `min`, `max` |
+| `float` | Decimal number | `min`, `max` |
+| `boolean` | True/false | — |
+| `email` | Email (auto-formatted) | — |
+| `date` / `dateTime` | ISO 8601 | `format` |
+| `uuid` | UUID v4 (auto-generates) | — |
+| `file` | Binary (form-data only) | `accept`, `max_size_mb` |
+
+### Body Types
+
+| Type | Use Case |
+|------|----------|
+| `json` | REST API payloads — define `schema` map |
+| `formdata` | File uploads — define `fields` list |
+| `urlencoded` | HTML forms — same as `json` |
+| `binary` | Raw file — `mime_type` + `encoding` |
+| `raw` | Custom content type — `content_type` override |
+
+### Modular Includes
+
+Split large APIs across files:
 
 ```yaml
 # main.yml
-name: my-api
-version: 2.0.0
+name: enterprise-api
+version: 3.0.0
 apinox: "1.0"
 
 includes:
   - path: ./includes/auth.yml
   - path: ./includes/users.yml
-    prefix: /v2          # Prefix all endpoint paths with /v2
+    prefix: /v3          # Prefix all endpoint paths with /v3
+  - path: ./includes/orders.yml
 ```
 
 ```yaml
@@ -464,147 +273,86 @@ endpoints:
     method: GET
     path: /users/{user_id}
     responses:
-      - status: 200
-        description: User found
+      - status: 200;  description: User found
         examples:
           - name: default
-            value:
-              id: usr_1
-              name: John Doe
+            value: { id: "usr_1",  name: "John Doe" }
 ```
 
 ---
 
 ## CLI Commands
 
-### `validate`
-
-Validate schema syntax, references, and detect issues.
+### `validate` — Check schema for errors
 
 ```bash
-# Text output (default)
-apinox validate api-spec.yml
-
-# JSON output (for CI integration)
-apinox validate api-spec.yml --format json
+apinox validate api-spec.yml              # Text output
+apinox validate api-spec.yml --format json  # CI-friendly JSON
 ```
 
-**Validates:**
-- Required fields: `name`, `version`, `apinox`
-- Duplicate endpoint IDs, group IDs, response example names
-- Auth scheme references (default + per-endpoint)
-- Group references on endpoints
-- Path parameter declarations match actual path templates
-- HTTP method validity (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
-- Response examples exist
-- Unused auth schemes (warning)
-- Groups without endpoints (info)
+Checks: required fields, duplicate IDs, broken auth/group refs, path-param mismatches, invalid methods, missing examples → exit code `0`=valid, `1`=errors.
 
-### `build`
-
-Generate output files from schema.
+### `build` — Generate output formats
 
 ```bash
-# Generate all formats
-apinox build api-spec.yml
-
-# Custom output directory
-apinox build api-spec.yml -o ./docs/dist
-
-# Single format
-apinox build api-spec.yml -f postman
-apinox build api-spec.yml -f openapi
-apinox build api-spec.yml -f markdown
-apinox build api-spec.yml -f scalar
-apinox build api-spec.yml -f insomnia
-apinox build api-spec.yml -f hurl
-
-# Skip validation (build even with warnings)
-apinox build api-spec.yml --skip-validate
+apinox build api-spec.yml                         # All 7 formats → ./dist/
+apinox build api-spec.yml -o ./docs               # Custom output dir
+apinox build api-spec.yml -f postman              # Single format
+apinox build api-spec.yml --skip-validate          # Skip validation
 ```
 
-### `watch`
+Format values: `postman`, `openapi`, `markdown`, `scalar`, `insomnia`, `hurl`, `all` (default).
 
-Watch schema file and auto-rebuild on changes.
+### `watch` — Auto-rebuild on changes
 
 ```bash
 apinox watch api-spec.yml -o ./dist
 ```
 
-Uses filesystem notifications via the `notify` crate. Rebuilds with a 300ms debounce.
+Filesystem notifications with 300ms debounce.
 
-### `diff`
-
-Show changes between two schema versions. Requires `changelog` entries in the schema.
-
-```yaml
-changelog:
-  - version: 2.0.0
-    date: 2026-06-18
-    changes:
-      - endpoint: list-users
-        description: Added cursor pagination
-      - endpoint: create-user
-        description: Added role field
-        from_type: user
-        to_type: admin
-      - endpoint: delete-user
-        description: Deprecated
-```
+### `diff` — Show version changes
 
 ```bash
 apinox diff api-spec.yml 1.0.0 2.0.0
 apinox diff api-spec.yml 1.0.0 2.0.0 --format text
 ```
 
-### `migrate`
+Uses `changelog` entries in the schema → generates human-readable diff.
 
-Generate migration guide between two schema files (schema diff mode — compares actual schemas, not changelog entries).
+### `migrate` — Compare two schema files
 
 ```bash
 apinox migrate api-v1.yml api-v2.yml
 apinox migrate api-v1.yml api-v2.yml -o migration-guide.md
 ```
 
-### `import`
+Compares actual schema contents (not changelog entries).
 
-Import OpenAPI 3.x or Swagger 2.0 spec to Apinox schema.
+### `import` — Convert OpenAPI to Apinox schema
 
 ```bash
-# Output to file
 apinox import swagger.json -o api-spec.yml
-
-# Output to stdout
-apinox import openapi.yaml
+apinox import openapi.yaml                     # Output to stdout
 ```
 
-### `sync`
+Supports OpenAPI 3.x and Swagger 2.0.
 
-Push Postman collection directly to a Postman workspace.
+### `sync` — Push Postman to workspace
 
 ```bash
-# Using CLI args
 apinox sync api-spec.yml \
-  --postman-key pm_api_key_xxx \
+  --postman-key PMAK-xxx \
   --workspace wkspc_xxx \
   --collection-name "My API"
-
-# Update existing collection
-apinox sync api-spec.yml \
-  --postman-key pm_api_key_xxx \
-  --workspace wkspc_xxx \
-  --collection-id clctn_xxx
-
-# Using .apinox.toml config
-apinox sync api-spec.yml
 ```
 
-Config file (`.apinox.toml`):
+Or configure `.apinox.toml`:
 
 ```toml
 [sync.postman]
-api_key = "pm_api_key_xxx"
-workspace_id = "wkspc_xxx"
+api_key = "PMAK-xxx"
+workspace_id = "1a2b3c4d-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 collection_id = "clctn_xxx"
 ```
 
@@ -612,108 +360,67 @@ collection_id = "clctn_xxx"
 
 ## Output Formats
 
-### Postman Collection
+| Format | File | Import Into |
+|--------|------|-------------|
+| **Postman** | `<name>.postman_collection.json` | Postman app |
+| **OpenAPI 3.1** | `<name>.openapi.yaml` | Swagger UI, Redoc, Stoplight |
+| **Markdown** | `<name>.md` | Git repos, wikis, docs sites |
+| **Scalar** | `<name>.scalar.html` | Browser (interactive, self-contained) |
+| **Insomnia** | `<name>.insomnia.json` | Insomnia REST Client |
+| **Hurl** | `<name>.hurl` + `<name>.sh` | `hurl --test`, CI pipelines |
+| **curl** | `<name>.sh` | Any shell |
 
-Interactive API collection ready for Postman:
+### Build output example
 
-```bash
-apinox build api-spec.yml -f postman
-# Output: ./dist/postman/<name>.postman_collection.json
+```
+$ apinox build api-spec.yml -o dist/
+
+  Validated 14 endpoints, 6 groups, 2 auth schemes
+  0 errors, 2 warnings (missing examples)
+
+  Generated 7 formats to dist/:
+
+  dist/
+  ├── postman/     my-api.postman_collection.json     (18KB)
+  ├── openapi/     my-api.openapi.yaml                 (22KB)
+  ├── docs/        my-api.md                           (10KB)
+  ├── docs/        my-api.scalar.html                  (34KB)
+  ├── insomnia/    my-api.insomnia.json                (11KB)
+  └── hurl/        my-api.hurl + .sh                    (8KB)
+
+  Done in 12ms
 ```
 
-Includes:
-- All endpoints with methods and paths
-- Path/query/header parameters
-- Request body schemas and examples
-- Response examples
-- Auth configuration
-- Environment variables
+---
 
-### OpenAPI 3.1
+## Features
 
-Standard OpenAPI specification:
-
-```bash
-apinox build api-spec.yml -f openapi
-# Output: ./dist/openapi/<name>.openapi.yaml
-```
-
-Compatible with Swagger UI, Redoc, Stoplight, and any OpenAPI 3.1 tool.
-
-### Markdown Documentation
-
-Human-readable API documentation:
-
-```bash
-apinox build api-spec.yml -f markdown
-# Output: ./dist/docs/<name>.md
-```
-
-Clean markdown with endpoint groups, request/response schemas, and examples.
-
-### Scalar Interactive Docs
-
-Beautiful interactive API reference using [Scalar](https://scalar.com):
-
-```bash
-apinox build api-spec.yml -f scalar
-# Output: ./dist/docs/<name>.scalar.html
-```
-
-Self-contained HTML file with interactive testing UI.
-
-### Insomnia Import
-
-Import into Insomnia REST Client:
-
-```bash
-apinox build api-spec.yml -f insomnia
-# Output: ./dist/insomnia/<name>.insomnia.json
-```
-
-### Hurl Test Scripts
-
-Runnable test scripts using [Hurl](https://hurl.dev):
-
-```bash
-apinox build api-spec.yml -f hurl
-# Output: ./dist/hurl/<name>.hurl + ./dist/hurl/<name>.sh
-```
-
-```bash
-# Run tests
-hurl --test ./dist/hurl/my-api.hurl
-
-# Or use the shell script (curl-based)
-bash ./dist/hurl/my-api.sh
-```
+| Feature | Description |
+|---------|-------------|
+| 🔗 **Single Source of Truth** | Define once, generate 7 formats |
+| ✅ **Validation** | Catch missing fields, duplicates, broken refs before build |
+| 👁 **File Watching** | `watch` auto-rebuilds on schema changes |
+| 📥 **OpenAPI Import** | Convert existing OpenAPI/Swagger to Apinox schema |
+| 📊 **Schema Diff** | See breaking changes between versions |
+| 📋 **Migration Guide** | Generate version-to-version migration docs |
+| ☁️ **Postman Sync** | Push collections directly to Postman workspace |
+| 📦 **Modular Includes** | Split large APIs into multiple files |
+| 📝 **Changelog** | Track endpoint-level changes in the schema |
+| 🔐 **Auth Schemes** | Bearer, API Key, Basic, OAuth2 — per-endpoint overrides |
+| 🧪 **Faker Fixtures** | Auto-generated Postman dynamic variables |
+| 🛡️ **Sensitive Fields** | Mark passwords/tokens — hidden in Postman, redacted from docs |
+| 🚀 **CI Ready** | Validate and build in GitHub Actions |
 
 ---
 
 ## CI/CD Integration
 
-### GitHub Actions Release
-
-Tag a version to auto-build and release binaries for all platforms:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-The `.github/workflows/release.yml` workflow:
-1. Builds for Linux (x86_64 + ARM64), macOS (x86_64 + ARM64), Windows (x86_64)
-2. Creates a GitHub Release with auto-generated release notes
-3. Attaches all platform binaries
-
-### CI Validation
+Validate your schema on every push:
 
 ```yaml
 # .github/workflows/validate.yml
 name: Validate API Schema
-
 on: [push, pull_request]
-
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -723,155 +430,45 @@ jobs:
         run: |
           curl -sL https://github.com/denisetiya/apinox/releases/latest/download/apinox-linux-x86_64 -o apinox
           chmod +x apinox
-      - name: Validate schema
+      - name: Validate
         run: ./apinox validate docs/api-spec.yml --format json
 ```
 
----
-
-## Changelog & Diff
-
-Track API changes over time directly in the schema:
-
-```yaml
-changelog:
-  - version: 2.0.0
-    date: 2026-06-18
-    changes:
-      - endpoint: list-users
-        description: Added cursor pagination with nextCursor and hasMore fields
-      - endpoint: get-user
-        description: Response now includes role and permissions
-
-  - version: 1.0.0
-    date: 2026-06-01
-    changes:
-      - endpoint: list-users
-        description: Initial implementation
-```
-
-View changes:
+Tag a release to auto-build binaries for all platforms:
 
 ```bash
-apinox diff docs/api-spec.yml 1.0.0 2.0.0
+git tag v1.0.0 && git push origin v1.0.0
 ```
 
-Output:
-
-```markdown
-## Changes from 1.0.0 to 2.0.0
-
-### Added
-- **list-users**: Added cursor pagination with nextCursor and hasMore fields
-
-### Changed
-- **get-user**: Response now includes role and permissions
-```
-
----
-
-## Modular Schemas
-
-For large APIs, split schemas into multiple files:
-
-```yaml
-# api-spec.yml
-name: enterprise-api
-version: 3.1.0
-apinox: "1.0"
-base_url: https://api.example.com/v3
-
-auth:
-  default: bearer
-  schemes:
-    - id: bearer
-      type: http
-      scheme: bearer
-      header: Authorization
-      prefix: "Bearer "
-
-groups:
-  - id: users
-    name: Users
-  - id: orders
-    name: Orders
-  - id: payments
-    name: Payments
-
-includes:
-  - path: ./includes/users.yml
-  - path: ./includes/orders.yml
-    prefix: /v3
-  - path: ./includes/payments.yml
-```
-
-**Available fields in included files:**
-- `endpoints` — merged into main schema's endpoints
-- `auth` scheme definitions (merge)
-- `environments` (merge)
-
-Output directory structure for includes following the `path` attribute (relative to parent schema).
-
----
-
-## Postman Sync
-
-Push generated Postman collections directly to your Postman workspace:
-
-```bash
-# One-time sync
-apinox sync api-spec.yml \
-  --postman-key PMAK-xxx \
-  --workspace 1a2b3c4d-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-
-# Or configure .apinox.toml
-echo '[sync.postman]
-api_key = "PMAK-xxx"
-workspace_id = "1a2b3c4d-xxxx-xxxx-xxxx-xxxxxxxxxxxx"' > .apinox.toml
-
-apinox sync api-spec.yml
-```
-
-**Features:**
-- Creates new collection or updates existing one
-- Auto-finds collection by name
-- Uploads complete collection with auth, examples, and environments
+The [release workflow](.github/workflows/release.yml) builds for Linux, macOS, Windows (x86_64 + ARM64) and creates a GitHub Release with all binaries.
 
 ---
 
 ## Build from Source
 
-### Prerequisites
-
-- [Rust](https://rustup.rs/) 1.70+
-- Cross-compilation targets (optional):
-  - `rustup target add aarch64-unknown-linux-gnu`
-  - `rustup target add x86_64-pc-windows-gnu`
-  - `rustup target add x86_64-apple-darwin`
-  - `rustup target add aarch64-apple-darwin`
-
-### Build
-
 ```bash
-# Debug build
+git clone https://github.com/denisetiya/apinox.git
+cd apinox
+
+# Debug
 cargo build
 
-# Release build
+# Release
 cargo build --release
 
-# Cross-compile (Linux x86_64 → ARM64)
+# Binary at target/release/apinox
+```
+
+**Prerequisites:** Rust 1.70+
+
+### Cross-compile
+
+```bash
+rustup target add aarch64-unknown-linux-gnu
 cargo build --release --target aarch64-unknown-linux-gnu
 ```
 
-The binary is at `target/release/apinox`.
-
-### Build All Platforms
-
-```bash
-./build-all.sh
-```
-
-Requires cross-compilation toolchains installed. Output goes to `releases/`.
+Or use `./build-all.sh` for all platforms (output → `releases/`).
 
 ---
 
@@ -880,21 +477,17 @@ Requires cross-compilation toolchains installed. Output goes to `releases/`.
 ```
 apinox/
 ├── src/
-│   ├── main.rs              # CLI entry point
+│   ├── main.rs              # CLI entry (clap)
 │   ├── lib.rs               # Module declarations
 │   ├── schema/              # Schema data types
-│   │   ├── mod.rs
 │   │   ├── root.rs          # Root schema, groups, changelog
 │   │   ├── endpoint.rs      # Endpoint, body, response definitions
 │   │   ├── auth.rs          # Auth schemes
 │   │   ├── environment.rs   # Environment definitions
 │   │   └── types.rs         # Enums (HttpMethod, BodyType, ApinoxType)
-│   ├── parser/              # YAML/JSON schema file parser
-│   │   └── mod.rs
+│   ├── parser/              # YAML/JSON file parser
 │   ├── validator/           # Schema validation logic
-│   │   └── mod.rs
 │   ├── generator/           # Output format generators
-│   │   ├── mod.rs
 │   │   ├── postman.rs       # Postman Collection v2.1
 │   │   ├── openapi.rs       # OpenAPI 3.1 YAML
 │   │   ├── markdown.rs      # Markdown docs
@@ -902,58 +495,40 @@ apinox/
 │   │   ├── insomnia.rs      # Insomnia v4 import
 │   │   └── hurl.rs          # Hurl + curl scripts
 │   ├── importer/            # OpenAPI/Swagger import
-│   │   └── mod.rs
 │   ├── diff/                # Schema diff & migration guide
-│   │   └── mod.rs
 │   └── sync/                # Postman API sync
-│       ├── mod.rs
 │       └── postman.rs
-├── landing/                 # Landing page (apinox.denisetiya.site)
+├── landing/                 # Static site (apinox.denisetiya.site)
 │   ├── Dockerfile
 │   ├── docker-compose.yml
 │   ├── nginx.conf
 │   └── public/
-│       ├── index.html       # Marketing/landing page
-│       ├── install.sh       # Linux/macOS installer script
-│       └── install.ps1      # Windows installer script
-├── test/                    # Test schemas and sample outputs
-│   ├── api-spec.yml
-│   ├── atomix-cloud-api.yml
-│   ├── sample-openapi.yml
-│   ├── modular-config.yml
-│   └── imported-api.yml
+│       ├── index.html
+│       ├── docs/            # Full documentation page
+│       ├── install.sh
+│       └── install.ps1
+├── test/                    # Sample schemas & test data
 ├── .github/workflows/
-│   └── release.yml          # GitHub Actions release workflow
+│   └── release.yml
 ├── Cargo.toml
-├── build-all.sh
-└── README.md
+└── build-all.sh
 ```
 
 ---
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feat/my-feature`)
-3. Make your changes
-4. Run tests (`cargo test`)
-5. Run linter (`cargo clippy -- -D warnings`)
-6. Commit using conventional commits (`feat:`, `fix:`, `docs:`, `chore:`)
-7. Push and open a Pull Request
-
-### Commit Convention
-
-```
-type(scope): description
-
-feat(api): add cursor pagination support
-fix(generator): handle empty response examples
-docs(readme): add quick-start guide
-chore(deps): upgrade clap to v4
-```
+1. Fork → create branch (`feat/my-feature`)
+2. `cargo test` + `cargo clippy -- -D warnings`
+3. Commit with [conventional commits](https://www.conventionalcommits.org/):
+   - `feat:` new feature
+   - `fix:` bug fix
+   - `docs:` documentation
+   - `chore:` maintenance
+4. Open a Pull Request
 
 ---
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT — see [LICENSE](LICENSE).
